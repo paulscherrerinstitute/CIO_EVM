@@ -1,0 +1,3 @@
+[submodule "modules/psi_common"]
+	path = modules/psi_common
+	url = https://github.com/paulscherrerinstitute/psi_common
