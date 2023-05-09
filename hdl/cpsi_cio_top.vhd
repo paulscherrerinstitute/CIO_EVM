@@ -9,14 +9,16 @@
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-library UNISIM;
-use UNISIM.VCOMPONENTS.ALL;
+--library UNISIM;
+--use UNISIM.VCOMPONENTS.ALL;
 use work.psi_common_axi_pkg.all;
 
 entity cpsi_cio_top is
  generic (
    G_FW_GIT_VERSION      : std_logic_vector(255 downto 0) := (others=>'1');
-   G_FW_BUILD_DATE_TIME  : std_logic_vector(159 downto 0) := (others=>'1')
+   G_FW_BUILD_DATE_TIME  : std_logic_vector(159 downto 0) := (others=>'1');
+   G_ID_FACILITY         : string                         := "CPSI-S";
+   G_ID_PROJECT          : string                         := "EVM"
    );
  port (
     CLK_A_GTH_MSH_SFP1_N : in STD_LOGIC;
@@ -108,24 +110,64 @@ end entity cpsi_cio_top;
 
 architecture STRUCTURE of cpsi_cio_top is
 
-   signal axiClk       : std_logic;
-   signal axiRst       : std_logic;
-   signal axi_ms       : rec_axi_ms;
-   signal axi_sm       : rec_axi_sm;
-   signal irq          : std_logic_vector(15 downto 0);
+  -- defined by the TCL code that instantiates the AXI crossbar IP
+  constant N_MST_C                             : natural := 5;
+  constant FW_ID_IDX_C                         : natural := 0;
+  constant CLKMS_IDX_C                         : natural := 1;
+  constant FLEMO_IDX_C                         : natural := 2;
+  constant T_DLY_IDX_C                         : natural := 3;
+  constant EVM_IDX_C                           : natural := 4;
 
+  signal axiClk                                : std_logic;
+  signal axiRst                                : std_logic;
+  signal axiRstb                               : std_logic;
+  signal axi_ms                                : rec_axi_ms;
+  signal axi_sm                                : rec_axi_sm;
+  signal irq                                   : std_logic_vector(15 downto 0);
+
+  signal maxi_ms                               : typ_arr_axi_ms(N_MST_C - 1 downto 0);
+  signal maxi_sm                               : typ_arr_axi_sm(N_MST_C - 1 downto 0) := (others => C_AXI_SM_DEF);
 begin
 
   irq <= (others => '0');
 
   PS_i: entity work.ZynqMpPSWrapper
     port map (
-      axi_aclk             => axiClk,
-      axi_peripheral_reset => axiRst,
-      pl_ps_irq0           => irq( 7 downto 0),
-      pl_ps_irq1           => irq(15 downto 8),
-      axi_ms               => axi_ms,
-      axi_sm               => axi_sm
+      axi_aclk                          => axiClk,
+      axi_peripheral_reset              => axiRst,
+      axi_peripheral_aresetn            => axiRstb,
+      pl_ps_irq0                        => irq( 7 downto 0),
+      pl_ps_irq1                        => irq(15 downto 8),
+      axi_ms                            => axi_ms,
+      axi_sm                            => axi_sm
+    );
+
+  XBar_i : entity work.AxiXbarWrapper
+    port map (
+      aclk                              => axiClk,
+      aresetn                           => axiRstb,
+      saxi_ms                           => axi_ms,
+      saxi_sm                           => axi_sm,
+      maxi_ms                           => maxi_ms,
+      maxi_sm                           => maxi_sm
+    );
+
+  FwId_i : entity work.AxiFwVersionWrapper
+    generic map (
+      C_ID_FACILITY                     => G_ID_FACILITY,
+      C_ID_PROJECT                      => G_ID_PROJECT,
+      C_REV_PINS                        => False
+    )
+    port map (
+      param_fw_git_version_i            => G_FW_GIT_VERSION,
+      param_fw_build_datetime_i         => G_FW_BUILD_DATE_TIME,
+
+      rev_pins_i                        => open,
+
+      aclk                              => axiClk,
+      aresetn                           => axiRstb,
+      axi_ms                            => maxi_ms(FW_ID_IDX_C),
+      axi_sm                            => maxi_sm(FW_ID_IDX_C)
     );
 
 end architecture STRUCTURE;

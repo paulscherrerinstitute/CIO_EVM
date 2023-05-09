@@ -13,8 +13,8 @@ entity ZynqMpPSWrapper is
     axi_peripheral_reset     : out std_logic;
     dcm_locked               : in  std_logic   := '1';
     mb_debug_sys_rst_in      : in  std_logic   := '0';
-    pl_ps_irq0               : in  std_logic_vector ( 7 to 0 ) := (others => '0');
-    pl_ps_irq1               : in  std_logic_vector ( 7 to 0 ) := (others => '0');
+    pl_ps_irq0               : in  std_logic_vector ( 7 downto 0 ) := (others => '0');
+    pl_ps_irq1               : in  std_logic_vector ( 7 downto 0 ) := (others => '0');
     axi_ms                   : out rec_axi_ms;
     axi_sm                   : in  rec_axi_sm
   );
@@ -32,8 +32,8 @@ architecture rtl of ZynqMpPSWrapper is
       axi_peripheral_reset : out STD_LOGIC_VECTOR ( 0 to 0 );
       dcm_locked : in STD_LOGIC;
       mb_debug_sys_rst_in : in STD_LOGIC;
-      pl_ps_irq0 : in STD_LOGIC_VECTOR ( 7 to 0 );
-      pl_ps_irq1 : in STD_LOGIC_VECTOR ( 7 to 0 );
+      pl_ps_irq0 : in STD_LOGIC_VECTOR ( 7 downto 0 );
+      pl_ps_irq1 : in STD_LOGIC_VECTOR ( 7 downto 0 );
       axi_m00_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
       axi_m00_awlen : out STD_LOGIC_VECTOR ( 7 downto 0 );
       axi_m00_awsize : out STD_LOGIC_VECTOR ( 2 downto 0 );
