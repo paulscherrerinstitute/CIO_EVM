@@ -5,6 +5,69 @@
 import sys
 import io
 
+# Object with setters/getters. We want setters to return the object instance
+# so that we can write
+#    o.prop1(val1).prop2(val2)
+# which is not possible with the standard property object. We also want to
+# have to write less code, i.e., automatically return a default value if
+# a property is not set in the constructor.
+# Getting a property value requires a function; just using o.prop is not
+# possible. Interpret an empty argument list as a 'get' operation:
+#
+#   o.prop1()    -> get 'prop1'
+#   o.prop1(val) -> set 'prop1' to 'val' and return o
+
+class PropBase:
+  # properties are dictionary of properties mapping to a default value
+  #
+  #  props = { "p1" : dflt1, "p2" : dflt2, ... } 
+  #
+  # by default: empty
+  props = {}
+
+  def __init__(self, **kwargs):
+    super().__init__()
+    for kv in kwargs.items():
+      getattr(self, kv[0])( kv[1] )
+
+  def __init_subclass__(cls, **kwargs):
+    # inheritance
+    d = cls.__bases__[0].props
+    try:
+      myprops = cls.props
+      d       = d.copy()
+      d.update( myprops )
+    except AttributeError:
+      # this class has nothing to add
+      pass
+    cls.props = d
+
+  # override __getattribute__()
+  def __getattribute__(self, prop):
+    # super-class method; we can't call super() from the
+    # the local function definition as this would be executed
+    # too late...
+    sga = super().__getattribute__
+
+    # setter-getter
+    def setget(*args):
+      if ( len( args ) == 0 ):
+        # get
+        try:
+           return sga("_" + prop)
+        except AttributeError as e:
+          # not set; return class-specific default
+          return self.props[prop]
+      else:
+        # set
+        setattr(self, "_" + prop, *args)
+        return self
+    if ( prop != "props" ):
+      if ( prop in self.props ):
+        return setget
+    return sga(prop)
+        
+
 class MstPort:
   def __init__(self, addr, width=12):
     if ( addr < 0 ):
@@ -28,44 +91,47 @@ class MstPort:
   def description(self):
     return "0x{:08x}..0x{:08x}".format( self.addr, self.addr + (1 << self.width) - 1 )
 
-class AxiPort:
-  SIGNALS = [
-    [ "aw", "addr", True, 31 ],
-    [ "aw", "len", True, 7 ],
-    [ "aw", "size", True, 2 ],
-    [ "aw", "burst", True, 1 ],
-    [ "aw", "lock", True, 0 ],
-    [ "aw", "cache", True, 3 ],
-    [ "aw", "prot", True, 2 ],
-    [ "aw", "qos", True, 3 ],
-    [ "aw", "user", True, 0 ],
-    [ "aw", "valid", True, 0 ],
-    [ "aw", "ready", False, 0 ],
-    [ "w", "data", True, 31 ],
-    [ "w", "strb", True, 3 ],
-    [ "w", "last", True, 0 ],
-    [ "w", "valid", True, 0 ],
-    [ "w", "ready", False, 0 ],
-    [ "b", "resp", False, 1 ],
-    [ "b", "valid", False, 0 ],
-    [ "b", "ready", True, 0 ],
-    [ "ar", "addr", True, 31 ],
-    [ "ar", "len", True, 7 ],
-    [ "ar", "size", True, 2 ],
-    [ "ar", "burst", True, 1 ],
-    [ "ar", "lock", True, 0 ],
-    [ "ar", "cache", True, 3 ],
-    [ "ar", "prot", True, 2 ],
-    [ "ar", "qos", True, 3 ],
-    [ "ar", "user", True, 0 ],
-    [ "ar", "valid", True, 0 ],
-    [ "ar", "ready", False, 0 ],
-    [ "r", "data", False, 31 ],
-    [ "r", "resp", False, 1 ],
-    [ "r", "last", False, 0 ],
-    [ "r", "valid", False, 0 ],
-    [ "r", "ready", True, 0 ]
-  ]
+class AxiPort(PropBase):
+
+  _SIGNALS = {
+    "aw.addr"  : [ True, 31  ],
+    "aw.id"    : [ True, 0   ],
+    "aw.len"   : [ True, 7   ],
+    "aw.size"  : [ True, 2   ],
+    "aw.burst" : [ True, 1   ],
+    "aw.lock"  : [ True, 0   ],
+    "aw.cache" : [ True, 3   ],
+    "aw.prot"  : [ True, 2   ],
+    "aw.qos"   : [ True, 3   ],
+    "aw.user"  : [ True, 0   ],
+    "aw.valid" : [ True, 0   ],
+    "aw.ready" : [ False, 0  ],
+    "w.data"   : [ True, 31  ],
+    "w.strb"   : [ True, 3   ],
+    "w.last"   : [ True, 0   ],
+    "w.valid"  : [ True, 0   ],
+    "w.ready"  : [ False, 0  ],
+    "b.resp"   : [ False, 1  ],
+    "b.valid"  : [ False, 0  ],
+    "b.ready"  : [ True, 0   ],
+    "ar.addr"  : [ True, 31  ],
+    "ar.id"    : [ True, 0   ],
+    "ar.len"   : [ True, 7   ],
+    "ar.size"  : [ True, 2   ],
+    "ar.burst" : [ True, 1   ],
+    "ar.lock"  : [ True, 0   ],
+    "ar.cache" : [ True, 3   ],
+    "ar.prot"  : [ True, 2   ],
+    "ar.qos"   : [ True, 3   ],
+    "ar.user"  : [ True, 0   ],
+    "ar.valid" : [ True, 0   ],
+    "ar.ready" : [ False, 0  ],
+    "r.data"   : [ False, 31 ],
+    "r.resp"   : [ False, 1  ],
+    "r.last"   : [ False, 0  ],
+    "r.valid"  : [ False, 0  ],
+    "r.ready"  : [ True, 0   ]
+  }
 
   @staticmethod
   def toRecField(port):
@@ -73,80 +139,116 @@ class AxiPort:
       return "d"+port
     return port
 
-  def __init__(self, file=sys.stdout, indent=0):
-    self._f = file
-    self._i = "{:{IND}}".format("", IND=indent)
+  props = {
+    "file"   : sys.stdout,
+    "indent" : 0
+  }
+
+  def __init__(self, **kwargs):
+    self._s = self._SIGNALS
+    super().__init__(**kwargs)
 
   def p(self, s, end="\n"):
-    print( self._i + s, file=self._f, end=end )
+    print( "{:{IND}}{}".format( "", s, IND = self.indent() ), file=self.file(), end=end )
 
   def map(self):
     i = len(self.SIGNALS)
-    for s in self.SIGNALS:
+    for s in self.SIGNALS.items():
       i -= 1
-      self( s[0], s[1], s[2], s[3] + 1, (i == 0) )
+      nm = s[0].split(".")
+      self( nm[0], nm[1], s[1][0], s[1][1] + 1, (i == 0) )
+
+  @property
+  def SIGNALS(self):
+    return self._s
+
+  def filter(self, keys):
+    self._s = self._s.copy()
+    for k in keys:
+      del( self._s[k] )
 
   def __call__(self, port, sname, m2s, width, isLast):
     raise RuntimeError("Must be implemented by subclass")
 
 class AxiPortDecl(AxiPort):
-  def __init__(self, prefix, isMst, fieldWidth=40, nPortsInVect=1, indent=0, file=sys.stdout, isLastPort=False):
-    super().__init__(file, indent)
-    self._pre          = prefix
-    self._isMst        = isMst
-    self._isLastPort   = isLastPort
-    self._fieldWidth   = fieldWidth
+
+  props = {
+    "fieldWidth"     : 40,
+    "nPortsInVect"   : 1,
+    "isLastPort"     : False,
+    "isMst"          : True,
+    "prefix"         : ""
+  }
+
+  def __init__(self, prefix, isMst, **kwargs):
+    super().__init__(**kwargs)
+    self.prefix( prefix )
+    self.isMst ( isMst  )
+
+  def __call__(self, port, sname, m2s, width, isLast):
+    isMst = self.isMst()
     if isMst is None:
       iofmt = "{:s}"
     else:
       iofmt = "{:4s}"
-    self._fmt          = "{:{W}}: " + iofmt + "std_logic_vector( {:d} downto 0 ){}"
-    self._nPortsInVect = nPortsInVect
-
-  def __call__(self, port, sname, m2s, width, isLast):
-    if ( self._isMst is None ):
+    f = "{:{W}}: " + iofmt + "std_logic_vector( {:d} downto 0 ){}"
+    if ( isMst is None ):
       io = ""
-    elif ( m2s == self._isMst ):
+    elif ( m2s == isMst ):
       io = "out"
     else:
       io = "in"
     end = ";"
-    if ( isLast and self._isLastPort ):
+    if ( isLast and self.isLastPort() ):
       end = ""
-    self.p( self._fmt.format( self._pre + port + sname, io, width * self._nPortsInVect - 1, end, W=self._fieldWidth ) )
+    self.p( f.format( self.prefix() + port + sname, io, width * self.nPortsInVect() - 1, end, W=self.fieldWidth() ) )
 
 class AxiSignalDecl(AxiPortDecl):
-  def __init__(self, prefix, fieldWidth = 20, nPortsInVect = 1, file=sys.stdout, indent=0):
-    super().__init__(isMst=None, prefix=prefix, fieldWidth=fieldWidth, nPortsInVect=nPortsInVect, file=file, indent=0)
+
+  # change default value
+  props = { "fieldWidth" : 20 }
+
+  def __init__(self, prefix, **kwargs):
+    super().__init__(prefix, None, **kwargs)
     self._subIndent = "{:{W}}".format("",W=indent)
 
   def __call__(self, port, sname, m2s, width, isLast):
-    self.p( self._subIndent + "signal ", end="")
+    self.p( "signal ", end="" )
+    orig = self.indent()
+    self.indent( 0 )
     super().__call__(port, sname, m2s, width, isLast)
+    self.indent( orig )
 
+# Map a collection of flat signals to rec_axi_ms/rec_axi_sm
 class AxiPortMap(AxiPort):
-  def __init__(self, flatPrefix, recPrefix, fieldWidth=40, pruneAddr=None, useSRange=True, flatToRec=True, numPorts=1, isLastPort=False, file=sys.stdout, indent=0):
-    super().__init__(file=file, indent=indent)
-    self._flatPrefix = flatPrefix
-    self._recPrefix  = recPrefix
-    self._dir        = flatToRec
-    self._isLastPort = isLastPort
-    self._numPorts   = numPorts
-    self._pruneAddr  = pruneAddr
-    self._fieldWidth = fieldWidth
-    self._useSRange  = useSRange
+
+  props = {
+    "flatPrefix"      : "",     # prefix of the flat signals
+    "recPrefix"       : "",     # prefix of the records
+    "pruneAddr"       : None,   # optional: positive number limiting with of address mapping
+    "isLastPort"      : False,  # if this is the last port (omitting ',' at the end of the line)
+    "fieldWidth"      : 40,     # field width (pretty printing) of LHS
+    "useLHRange"      : True,   # whether to use a range on the LHS
+    "flatToRec"       : True,   # direction of mapping (currently unused/untested)
+    "numPorts"        : 1       # number of ports (array of records mapped to vectors on the flat side)
+  }
+
+  def __init__(self, flatPrefix, recPrefix, **kwargs):
+    super().__init__(**kwargs)
+    self.flatPrefix ( flatPrefix )
+    self.recPrefix  ( recPrefix )
 
   def __call__(self, port, sname, m2s, width, isLast):
-    if ( self._numPorts == 1 ):
+    if ( self.numPorts() == 1 ):
       fidx =''
     else:
       fidx = '({3:d})'
     trng = ""
-    if ( (sname == "addr") and (not self._pruneAddr is None) ):
-       trng = "({:} - 1 downto 0)".format( self._pruneAddr )
+    if ( (sname == "addr") and (not self.pruneAddr() is None) ):
+       trng = "({:} - 1 downto 0)".format( self.pruneAddr() )
     f = "{0:{W}} => {1}_{2}" + fidx + ".{4}.{5}" + trng + "{6}"
-    for pidx in range(self._numPorts):
-      if ( self._useSRange ):
+    for pidx in range(self.numPorts()):
+      if ( self.useLHRange() ):
         if ( (width == 1) and (sname != "user") ):
           rng = "({:d})".format( pidx )
         else:
@@ -155,17 +257,22 @@ class AxiPortMap(AxiPort):
           rng = "({:d} downto {:d})".format( l, r )
       else:
           rng = ""
-      flatName = self._flatPrefix + port + sname + rng
-      if ( m2s == self._dir ):
+      flatName = self.flatPrefix() + port + sname + rng
+      if ( m2s == self.flatToRec() ):
         direction = "ms"
       else:
         direction = "sm"
       end = ","
-      if isLast and self._isLastPort and pidx == self._numPorts - 1:
+      if isLast and self.isLastPort() and pidx == self.numPorts() - 1:
         end = ""
-      self.p( f.format(flatName, self._recPrefix, direction, pidx, self.toRecField(port), sname, end, W=self._fieldWidth) )
+      self.p( f.format(flatName, self.recPrefix(), direction, pidx, self.toRecField(port), sname, end, W=self.fieldWidth()) )
 
+# Xilinx AXI Crossbar IP
 class AxiXbar:
+
+  # The crossbar does not use the ID signals
+  _skip = [ "aw.id", "ar.id" ]
+
   def __init__(self, ports, name="AxiXBar"):
     self._ports = []
     for p in ports:
@@ -214,10 +321,12 @@ class AxiXbar:
     slvfmt = ind + "    {:40s}: {:3s} std_logic_vector( {:d} downto 0 ){}"
     print(slfmt.format( "aclk",    "in" ), file=file)
     print(slfmt.format( "aresetn", "in" ), file=file)
-    sport = AxiPortDecl( "s_axi_", isMst=False, indent=(indent + 4), file=file )
-    sport.map()
-    mport = AxiPortDecl( "m_axi_", isMst=True,  indent=(indent + 4), nPortsInVect=self.numMst, file=file, isLastPort=True )
-    mport.map()
+    port = AxiPortDecl( prefix="s_axi_", isMst=False, indent=(indent + 4), file=file )
+    port.filter( self._skip )
+    # crossbar 
+    port.map()
+    port.prefix( "m_axi_" ).isMst( True ).nPortsInVect( self.numMst ).isLastPort( True )
+    port.map()
     print(ind+"  );"       , file=file)
     print(ind+"end component {};".format( self.name ), file = file)
 
@@ -259,8 +368,33 @@ class AxiXbar:
     print("      {:40s} => {},".format("aclk",    clk),                                            file = file)
     print("      {:40s} => {},".format("aresetn", rst),                                            file = file)
     m = AxiPortMap( flatPrefix = "s_axi_", recPrefix="saxi",file=file, indent=6, isLastPort=False)
+    m.filter(self._skip)
     m.map()
-    m = AxiPortMap( flatPrefix = "m_axi_", recPrefix="maxi",file=file, indent=6, numPorts=self.numMst, isLastPort=True )
+    m.flatPrefix("m_axi_").recPrefix("maxi").numPorts(self.numMst).isLastPort(True)
     m.map()
     print("    );",                                                                                file = file)
     print("end architecture rtl;",                                                                 file = file)
+
+class AxiSubMap(AxiPortMap):
+
+  props = {
+    "indent"     :   6,
+    "fieldWidth" :  28
+  }
+
+  def __init__(self, flatPrefix="s00_axi_", recPrefix="axi", **kwargs):
+    super().__init__(flatPrefix, recPrefix, **kwargs)
+    self.filter( ["ar.qos", "aw.qos", "ar.user", "aw.user"] )
+    self.useLHRange( False )
+
+  def write(self, fnam):
+    fo=self.file()
+    try:
+      with io.open(fnam, "w") as f:
+        self.file(f)
+        self.map()
+    finally:
+      self.file(fo)
+
+    
+    
