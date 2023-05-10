@@ -254,6 +254,8 @@ architecture STRUCTURE of cpsi_cio_top is
 
   signal maxi_ms                               : typ_arr_axi_ms(N_MST_C - 1 downto 0);
   signal maxi_sm                               : typ_arr_axi_sm(N_MST_C - 1 downto 0) := (others => C_AXI_SM_DEF);
+
+  signal clocks                                : std_logic_vector(8 downto 0)         := (others => '0');
 begin
 
   irq <= (others => '0');
@@ -295,6 +297,22 @@ begin
       aresetn                           => axiRstb,
       axi_ms                            => maxi_ms(FW_ID_IDX_C),
       axi_sm                            => maxi_sm(FW_ID_IDX_C)
+    );
+
+  ClkMeas_i : entity work.ClkMeasureWrapper
+    generic map (
+      NumOfClocks_g                     => clocks'length,
+      AxiClkFreq_g                      => 125_000_000,
+      MaxClkFreq_g                      => 500_000_000
+    )
+    port map
+    (
+      Clocks                            => clocks,
+
+      aclk                              => axiClk,
+      aresetn                           => axiRstb,
+      axi_ms                            => maxi_ms(CLKMS_IDX_C),
+      axi_sm                            => maxi_sm(CLKMS_IDX_C)
     );
 
 end architecture STRUCTURE;

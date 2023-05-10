@@ -150,6 +150,13 @@ set obj [get_filesets utils_1]
 # Set 'utils_1' fileset properties
 set obj [get_filesets utils_1]
 
+# Generate stuff
+source "$origin_dir/zynqmp_ps_bd.tcl"
+close_bd_design [get_bd_designs CIO_CPSI]
+source "$origin_dir/AxiXBar.tcl"
+# Load Sources
+source "$origin_dir/sources.tcl"
+
 set idrFlowPropertiesConstraints ""
 catch {
  set idrFlowPropertiesConstraints [get_param runs.disableIDRFlowPropertyConstraints]
