@@ -30,8 +30,8 @@ entity ClkMeasureWrapper is
     -- Axi Slave Bus Interface
     -----------------------------------------------------------------------------
     -- System
-    aclk                        : in    std_logic;                                             -- Global Clock Signal
-    aresetn                     : in    std_logic;                                             -- Global Reset Signal. This signal is low active.
+    axi_aclk                    : in    std_logic;                                             -- Global Clock Signal
+    axi_aresetn                 : in    std_logic;                                             -- Global Reset Signal. This signal is low active.
 
     axi_ms                      : in    rec_axi_ms;
     axi_sm                      : out   rec_axi_sm
@@ -56,8 +56,8 @@ begin
     port map (
       Clocks                       => Clocks,
     
-      s00_axi_aclk                 => aclk,
-      s00_axi_aresetn              => aresetn,
+      s00_axi_aclk                 => axi_aclk,
+      s00_axi_aresetn              => axi_aresetn,
 
       s00_axi_awaddr               => axi_ms.aw.addr(8 - 1 downto 0),
       s00_axi_awid                 => axi_ms.aw.id,

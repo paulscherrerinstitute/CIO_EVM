@@ -21,8 +21,8 @@ use     work.psi_common_axi_pkg.all;
 
 entity AxiXBarWrapper is
   port (
-    aclk                                    : in  std_logic;
-    aresetn                                 : in  std_logic;
+    axi_aclk                                : in  std_logic;
+    axi_aresetn                             : in  std_logic;
     saxi_ms                                 : in  rec_axi_ms;
     saxi_sm                                 : out rec_axi_sm;
     maxi_ms                                 : out typ_arr_axi_ms(4 downto 0);
@@ -110,8 +110,8 @@ architecture rtl of AxiXBarWrapper is
 begin
   Xbar_i : component AxiXBar
     port map (
-      aclk                                     => aclk,
-      aresetn                                  => aresetn,
+      aclk                                     => axi_aclk,
+      aresetn                                  => axi_aresetn,
       s_axi_awaddr(31 downto 0)                => saxi_ms.aw.addr,
       s_axi_awlen(7 downto 0)                  => saxi_ms.aw.len,
       s_axi_awsize(2 downto 0)                 => saxi_ms.aw.size,

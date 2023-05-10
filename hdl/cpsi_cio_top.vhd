@@ -245,6 +245,9 @@ architecture STRUCTURE of cpsi_cio_top is
   constant T_DLY_IDX_C                         : natural := 3;
   constant EVM_IDX_C                           : natural := 4;
 
+  constant N_CLK_MEAS_C                        : natural := 9;
+  constant N_TRIGS_C                           : natural := 2;
+
   signal axiClk                                : std_logic;
   signal axiRst                                : std_logic;
   signal axiRstb                               : std_logic;
@@ -253,9 +256,13 @@ architecture STRUCTURE of cpsi_cio_top is
   signal irq                                   : std_logic_vector(15 downto 0);
 
   signal maxi_ms                               : typ_arr_axi_ms(N_MST_C - 1 downto 0);
-  signal maxi_sm                               : typ_arr_axi_sm(N_MST_C - 1 downto 0) := (others => C_AXI_SM_DEF);
+  signal maxi_sm                               : typ_arr_axi_sm(N_MST_C - 1 downto 0)                := (others => C_AXI_SM_DEF);
 
-  signal clocks                                : std_logic_vector(8 downto 0)         := (others => '0');
+  signal clocks                                : std_logic_vector(N_CLK_MEAS_C - 1 downto 0)         := (others => '0');
+  signal trigInp                               : std_logic_vector(N_TRIGS_C    - 1 downto 0)         := (others => '0');
+  signal trigOut                               : std_logic_vector(N_TRIGS_C    - 1 downto 0)         := (others => '0');
+
+  signal delayClk                              : std_logic := '0';
 begin
 
   irq <= (others => '0');
@@ -273,8 +280,8 @@ begin
 
   XBar_i : entity work.AxiXbarWrapper
     port map (
-      aclk                              => axiClk,
-      aresetn                           => axiRstb,
+      axi_aclk                          => axiClk,
+      axi_aresetn                       => axiRstb,
       saxi_ms                           => axi_ms,
       saxi_sm                           => axi_sm,
       maxi_ms                           => maxi_ms,
@@ -293,8 +300,8 @@ begin
 
       rev_pins_i                        => open,
 
-      aclk                              => axiClk,
-      aresetn                           => axiRstb,
+      axi_aclk                          => axiClk,
+      axi_aresetn                       => axiRstb,
       axi_ms                            => maxi_ms(FW_ID_IDX_C),
       axi_sm                            => maxi_sm(FW_ID_IDX_C)
     );
@@ -309,10 +316,26 @@ begin
     (
       Clocks                            => clocks,
 
-      aclk                              => axiClk,
-      aresetn                           => axiRstb,
+      axi_aclk                          => axiClk,
+      axi_aresetn                       => axiRstb,
       axi_ms                            => maxi_ms(CLKMS_IDX_C),
       axi_sm                            => maxi_sm(CLKMS_IDX_C)
+    );
+
+  Tim320Trig_i : entity work.Tim320TriggerWrapper
+    generic map (
+      C_S00_AXI_ADDR_WIDTH => 14,
+      C_NUM_TRIGGERS       => trigInp'length
+    )
+    port map (
+      i_delay_clk                       => delayClk,
+      TRIGGER_IN                        => trigInp,
+      TRIGGER_OUT                       => trigOut,
+
+      axi_aclk                          => axiClk,
+      axi_aresetn                       => axiRstb,
+      axi_ms                            => maxi_ms(T_DLY_IDX_C),
+      axi_sm                            => maxi_sm(T_DLY_IDX_C)
     );
 
 end architecture STRUCTURE;
