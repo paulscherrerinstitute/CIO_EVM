@@ -338,4 +338,8 @@ begin
       axi_sm                            => maxi_sm(T_DLY_IDX_C)
     );
 
+  maxi_sm(FLEMO_IDX_C) <= C_AXI_SM_DEF;
+
+  maxi_sm(EVM_IDX_C)   <= C_AXI_SM_DEF;
+
 end architecture STRUCTURE;
