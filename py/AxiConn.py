@@ -323,7 +323,7 @@ class AxiXbar:
     
   def _writeTcl(self, file=sys.stdout):
     print("## THIS CODE WAS AUTOMATICALLY GENERATED; DO NOT EDIT",                                                      file=file)
-    print("create_ip -name axi_crossbar -vendor xilinx.com -library ip -version 2 -module_name {}".format( self.name ), file=file )
+    print("create_ip -name axi_crossbar -vendor xilinx.com -library ip -version {{2.*}} -module_name {}".format( self.name ), file=file )
     print("set_property -dict [list \\",                                                                                file=file)
     print("  CONFIG.ARUSER_WIDTH {1} \\",                                                                               file=file)
     print("  CONFIG.AWUSER_WIDTH {1} \\",                                                                               file=file)
@@ -354,8 +354,8 @@ class AxiXbar:
     print(ind+"end component {};".format( self.name ), file = file)
 
   def _writeHdl(self, file=sys.stdout):
-    clk = "aclk"
-    rst = "aresetn"
+    clk = "axi_aclk"
+    rst = "axi_aresetn"
     print("-- THIS CODE WAS AUTOMATICALLY GENERATED; DO NOT EDIT",                                 file = file)
     print("-- Wrapper to expose an Axi Crossbar's AXI ports as records (defined",                  file = file)
     print("-- in the 'psi_common_axi_pkg.vhd' package).",                                          file = file)
@@ -388,8 +388,8 @@ class AxiXbar:
     print("begin",                                                                                 file = file)
     print("  Xbar_i : component {}".format(self.name),                                             file = file)
     print("    port map (",                                                                        file = file)
-    print("      {:40s} => {},".format("aclk",    clk),                                            file = file)
-    print("      {:40s} => {},".format("aresetn", rst),                                            file = file)
+    print("      {:40s}=> {},".format("aclk",    clk),                                            file = file)
+    print("      {:40s}=> {},".format("aresetn", rst),                                            file = file)
     m = AxiPortMap( flatPrefix = "s_axi_", recPrefix="saxi",file=file, indent=6, isLastPort=False)
     m.filter(self._skip)
     m.map()
