@@ -1,3 +1,6 @@
 [submodule "modules/psi_common"]
 	path = modules/psi_common
 	url = https://github.com/paulscherrerinstitute/psi_common
+[submodule "modules/clock_measure"]
+	path = modules/clock_measure
+	url = https://github.com/paulscherrerinstitute/vivadoIP_clock_measure

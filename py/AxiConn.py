@@ -133,6 +133,27 @@ class AxiPort(PropBase):
     "r.ready"  : [ True, 0   ]
   }
 
+  _AXIL_FILTER_KEYS = [
+    "aw.id",
+    "aw.len",
+    "aw.size",
+    "aw.burst",
+    "aw.lock",
+    "aw.cache",
+    "aw.qos",
+    "aw.user",
+    "w.last",
+    "ar.id",
+    "ar.len",
+    "ar.size",
+    "ar.burst",
+    "ar.lock",
+    "ar.cache",
+    "ar.qos",
+    "ar.user",
+    "r.last"
+  ]
+
   @staticmethod
   def toRecField(port):
     if ( (port == "r") or (port == "w") ):
@@ -166,6 +187,9 @@ class AxiPort(PropBase):
     self._s = self._s.copy()
     for k in keys:
       del( self._s[k] )
+
+  def trimToAxiLite(self):
+    self.filter( self._AXIL_FILTER_KEYS )
 
   def __call__(self, port, sname, m2s, width, isLast):
     raise RuntimeError("Must be implemented by subclass")
@@ -210,7 +234,6 @@ class AxiSignalDecl(AxiPortDecl):
 
   def __init__(self, prefix, **kwargs):
     super().__init__(prefix, None, **kwargs)
-    self._subIndent = "{:{W}}".format("",W=indent)
 
   def __call__(self, port, sname, m2s, width, isLast):
     self.p( "signal ", end="" )
@@ -246,7 +269,7 @@ class AxiPortMap(AxiPort):
     trng = ""
     if ( (sname == "addr") and (not self.pruneAddr() is None) ):
        trng = "({:} - 1 downto 0)".format( self.pruneAddr() )
-    f = "{0:{W}} => {1}_{2}" + fidx + ".{4}.{5}" + trng + "{6}"
+    f = "{0:{W}}=> {1}_{2}" + fidx + ".{4}.{5}" + trng + "{6}"
     for pidx in range(self.numPorts()):
       if ( self.useLHRange() ):
         if ( (width == 1) and (sname != "user") ):
