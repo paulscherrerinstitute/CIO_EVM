@@ -16,7 +16,7 @@ set files [list \
   [file normalize "$origin_dir/../modules/psi_common/hdl/psi_common_axi_slave_ipif.vhd"] \
   [file normalize "$origin_dir/../modules/clock_measure/hdl/clock_measure_vivado_wrp.vhd"] \
   [file normalize "$origin_dir/../modules/clock_measure/hdl/single_clock_measurement.vhd"] \
-  [file normalize "$origin_dir/../modules/tim320_trigger/hdl/tim320_trigger.vhd"] \
+  [file normalize "$origin_dir/../modules/tim320_trigger/Vivado/projectIP/tim320_trigger/hdl/tim320_trigger.vhd"] \
 ]
 
 add_files -norecurse -fileset [get_filesets sources_1] $files

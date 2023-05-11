@@ -4,3 +4,6 @@
 [submodule "modules/clock_measure"]
 	path = modules/clock_measure
 	url = https://github.com/paulscherrerinstitute/vivadoIP_clock_measure
+[submodule "modules/tim320_trigger"]
+	path = modules/tim320_trigger
+	url = git@github.com:paulscherrerinstitute/tim320_trigger_tmp
