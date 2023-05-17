@@ -7,3 +7,6 @@
 [submodule "modules/tim320_trigger"]
 	path = modules/tim320_trigger
 	url = git@github.com:paulscherrerinstitute/tim320_trigger_tmp
+[submodule "modules/fw_version_id"]
+	path = modules/fw_version_id
+	url = https://github.com/paulscherrerinstitute/fw_version_id
