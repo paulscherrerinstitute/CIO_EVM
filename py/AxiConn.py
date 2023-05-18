@@ -66,7 +66,6 @@ class PropBase:
       if ( prop in self.props ):
         return setget
     return sga(prop)
-        
 
 class MstPort:
   def __init__(self, addr, width=12):
@@ -166,32 +165,36 @@ class AxiPort(PropBase):
   }
 
   def __init__(self, **kwargs):
-    self._s = self._SIGNALS
+    self._s = self._SIGNALS.copy()
     super().__init__(**kwargs)
 
   def p(self, s, end="\n"):
     print( "{:{IND}}{}".format( "", s, IND = self.indent() ), file=self.file(), end=end )
 
-  def map(self):
+  def map(self, f=None, arg=None):
     i = len(self.SIGNALS)
+    if ( f is None ):
+      f = self
     for s in self.SIGNALS.items():
       i -= 1
       nm = s[0].split(".")
-      self( nm[0], nm[1], s[1][0], s[1][1] + 1, (i == 0) )
+      f( nm[0], nm[1], s[1][0], s[1][1] + 1, (i == 0), arg )
 
   @property
   def SIGNALS(self):
     return self._s
 
   def filter(self, keys):
-    self._s = self._s.copy()
     for k in keys:
       del( self._s[k] )
+
+  def setWidth(self, key, val):
+    self._s[key][1] = val - 1
 
   def trimToAxiLite(self):
     self.filter( self._AXIL_FILTER_KEYS )
 
-  def __call__(self, port, sname, m2s, width, isLast):
+  def __call__(self, port, sname, m2s, width, isLast, arg):
     raise RuntimeError("Must be implemented by subclass")
 
 class AxiPortDecl(AxiPort):
@@ -209,7 +212,7 @@ class AxiPortDecl(AxiPort):
     self.prefix( prefix )
     self.isMst ( isMst  )
 
-  def __call__(self, port, sname, m2s, width, isLast):
+  def __call__(self, port, sname, m2s, width, isLast, arg):
     isMst = self.isMst()
     if isMst is None:
       iofmt = "{:s}"
@@ -230,17 +233,45 @@ class AxiPortDecl(AxiPort):
 class AxiSignalDecl(AxiPortDecl):
 
   # change default value
-  props = { "fieldWidth" : 20 }
+  props = { "fieldWidth" : 20, "numPorts" : 1 }
 
   def __init__(self, prefix, **kwargs):
     super().__init__(prefix, None, **kwargs)
 
-  def __call__(self, port, sname, m2s, width, isLast):
+  def __call__(self, port, sname, m2s, width, isLast, arg):
     self.p( "signal ", end="" )
     orig = self.indent()
     self.indent( 0 )
-    super().__call__(port, sname, m2s, width, isLast)
+    super().__call__(port, sname, m2s, width * self.numPorts(), isLast, arg)
     self.indent( orig )
+
+  def mapping(self, assign, me, other, isLast):
+    rhs = me
+    lhs = other
+    isMst = self.isMst()
+    if isMst is None:
+      isMst = True
+    if ( assign ):
+      op  = "<="
+      end = ";"
+      if ( isMst != m2s ):
+        rhs = other
+        lhs = me
+    else:
+      op  = "=>"
+      end = ","
+      if ( not isMst ):
+        rhs = other
+        lhs = me
+    if ( self.isLastPort() and isLast ):
+      end = ""
+    self.p( "{:{FW}}{} {}{}".format( lhs, op, rhs, end, FW=self.fieldWidth() ) )
+
+  def assign(self, port, sname, m2s, width, isLast, arg):
+    self.mapping( True, self.prefix() + port + sname, arg + port + sname, isLast )
+
+  def pmap(self, port, sname, m2s, width, isLast, arg):
+    self.mapping( False, self.prefix() + port + sname, arg + port + sname, isLast )
 
 # Map a collection of flat signals to rec_axi_ms/rec_axi_sm
 class AxiPortMap(AxiPort):
@@ -253,7 +284,8 @@ class AxiPortMap(AxiPort):
     "fieldWidth"      : 40,     # field width (pretty printing) of LHS
     "useLHRange"      : True,   # whether to use a range on the LHS
     "flatToRec"       : True,   # direction of mapping (currently unused/untested)
-    "numPorts"        : 1       # number of ports (array of records mapped to vectors on the flat side)
+    "numPorts"        : 1,      # number of ports (array of records mapped to vectors on the flat side)
+    "isAssign"        : False   # create an assignment a <= b;
   }
 
   def __init__(self, flatPrefix, recPrefix, **kwargs):
@@ -261,34 +293,71 @@ class AxiPortMap(AxiPort):
     self.flatPrefix ( flatPrefix )
     self.recPrefix  ( recPrefix )
 
-  def __call__(self, port, sname, m2s, width, isLast):
+  def __call__(self, port, sname, m2s, width, isLast, arg):
     if ( self.numPorts() == 1 ):
       fidx =''
     else:
-      fidx = '({3:d})'
+      fidx = '({2:d})'
     trng = ""
+    prunedWidth = width
     if ( (sname == "addr") and (not self.pruneAddr() is None) ):
-       trng = "({:} - 1 downto 0)".format( self.pruneAddr() )
-    f = "{0:{W}}=> {1}_{2}" + fidx + ".{4}.{5}" + trng + "{6}"
+       prunedWidth = self.pruneAddr()
+       trng = "({:} - 1 downto 0)".format( prunedWidth )
+    if ( self.isAssign() ):
+       op = "<="
+    else:
+       op = "=>"
+    f = "{0:{W}}" + op + " {1}{2}"
     for pidx in range(self.numPorts()):
       if ( self.useLHRange() ):
         if ( (width == 1) and (sname != "user") ):
           rng = "({:d})".format( pidx )
         else:
           r   = pidx * width
-          l   = r + width - 1
+          l   = r + prunedWidth - 1
           rng = "({:d} downto {:d})".format( l, r )
       else:
           rng = ""
       flatName = self.flatPrefix() + port + sname + rng
-      if ( m2s == self.flatToRec() ):
+      if ( self.isAssign() ):
+        end = ";"
+      else:
+        end = ","
+      if isLast and self.isLastPort() and pidx == self.numPorts() - 1:
+        end = ""
+
+      #    flatToRec     dir-OUT                 ASSIGN
+      #       false      false           rec_sm    <= flat    
+      #       false      true            flat      <= rec_ms
+      #       true       false           flat      <= rec_sm  
+      #       true       true            rec_ms    <= flat
+      #                                           MAP
+      #       true       false           flat      => rec_sm  
+      #       true       true            flat      => rec_ms
+      #       false      false           rec_sm    => flat    
+      #       false      true            rec_ms    => flat
+      if ( m2s ):
         direction = "ms"
       else:
         direction = "sm"
-      end = ","
-      if isLast and self.isLastPort() and pidx == self.numPorts() - 1:
-        end = ""
-      self.p( f.format(flatName, self.recPrefix(), direction, pidx, self.toRecField(port), sname, end, W=self.fieldWidth()) )
+
+      recName = ("{0}_{1}" + fidx + ".{3}.{4}" + trng).format( self.recPrefix(), direction, pidx, self.toRecField( port ), sname )
+
+      if ( self.isAssign() ):
+        if (m2s != self.flatToRec() ):
+          lhs = flatName
+          rhs = recName
+        else:
+          lhs = recName
+          rhs = flatName
+      else:
+         if ( self.flatToRec() ):
+           lhs = flatName
+           rhs = recName
+         else:
+           lhs = recName
+           rhs = flatName
+      self.p( f.format(lhs, rhs, end, W=self.fieldWidth()) )
 
 # Xilinx AXI Crossbar IP
 class AxiXbar:
@@ -296,8 +365,11 @@ class AxiXbar:
   # The crossbar does not use the ID signals
   _skip = [ "aw.id", "ar.id" ]
 
-  def __init__(self, ports, name="AxiXBar"):
+  def __init__(self, ports, name="AxiXBar", saddrWidth=32):
     self._ports = []
+    if ( saddrWidth < 32 or saddrWidth > 64 ):
+      raise RuntimeError("invalid saddrWidth")
+    self._sawidth = saddrWidth
     for p in ports:
       for q in self._ports:
         if ( p.addr < q.addr + (1<<q.width) and q.addr < p.addr + (1<<p.width) ):
@@ -333,6 +405,10 @@ class AxiXbar:
       print("  CONFIG.M{:02d}_A00_ADDR_WIDTH {{{:d}}} \\".format( idx, p.width ),                                       file=file)
       idx += 1
     print("  CONFIG.NUM_MI {{{:d}}} \\".format( idx ),                                                                  file=file)
+    if self._sawidth != 32:
+      print("  CONFIG.ADDR_WIDTH {{{:d}}} \\".format( self._sawidth ),
+                   file=file)
+
     print("] [get_ips {}]".format( self.name ),                                                                         file=file)
 
   def _writeComponentDeclaration(self, file=sys.stdout, indent=0):
@@ -341,11 +417,12 @@ class AxiXbar:
     print(ind + "  port (", file=file)
     slfmt  = ind + "    {:40s}: {:3s} std_logic;" 
     slvfmt = ind + "    {:40s}: {:3s} std_logic_vector( {:d} downto 0 ){}"
-    slvfmt = ind + "    {:40s}: {:3s} std_logic_vector( {:d} downto 0 ){}"
     print(slfmt.format( "aclk",    "in" ), file=file)
     print(slfmt.format( "aresetn", "in" ), file=file)
     port = AxiPortDecl( prefix="s_axi_", isMst=False, indent=(indent + 4), file=file )
     port.filter( self._skip )
+    port.setWidth( "ar.addr", self._sawidth )
+    port.setWidth( "aw.addr", self._sawidth )
     # crossbar 
     port.map()
     port.prefix( "m_axi_" ).isMst( True ).nPortsInVect( self.numMst ).isLastPort( True )
@@ -376,6 +453,11 @@ class AxiXbar:
     print("  port (",                                                                              file = file)
     print("    {:40s}: in  std_logic;".format(clk),                                                file = file)
     print("    {:40s}: in  std_logic;".format(rst),                                                file = file)
+    n = "saxi_araddr_hi"
+    l = 39
+    print("    {:40s}: in  std_logic_vector( {:d} downto 32 ) := (others => '0');".format(n, l),   file = file)
+    n = "saxi_awaddr_hi"
+    print("    {:40s}: in  std_logic_vector( {:d} downto 32 ) := (others => '0');".format(n, l),   file = file)
     print("    {:40s}: in  rec_axi_ms;".format("saxi_ms", self.numMst - 1),                        file = file)
     print("    {:40s}: out rec_axi_sm;".format("saxi_sm", self.numMst - 1),                        file = file)
     print("    {:40s}: out typ_arr_axi_ms({:d} downto 0);".format("maxi_ms", self.numMst - 1),     file = file)
@@ -385,18 +467,50 @@ class AxiXbar:
     print("",                                                                                      file = file)
     print("architecture rtl of {}Wrapper is".format( self.name ),                                  file = file)
     self._writeComponentDeclaration(file=file, indent=2)
+    print("",                                                                                      file = file)
+
+    msig = AxiSignalDecl( "m_axi00_", file=file, indent=2)
+    msig.numPorts( self.numMst )
+    msig.filter( self._skip )
+    msig.map()
+    print("",                                                                                      file = file)
+
+    ssig = AxiSignalDecl( "s_axi00_", file=file, indent=2)
+    ssig.filter( self._skip )
+    ssig.map()
+    print("",                                                                                      file = file)
+
     print("begin",                                                                                 file = file)
     print("  Xbar_i : component {}".format(self.name),                                             file = file)
     print("    port map (",                                                                        file = file)
     print("      {:40s}=> {},".format("aclk",    clk),                                            file = file)
     print("      {:40s}=> {},".format("aresetn", rst),                                            file = file)
-    m = AxiPortMap( flatPrefix = "s_axi_", recPrefix="saxi",file=file, indent=6, isLastPort=False)
-    m.filter(self._skip)
-    m.map()
-    m.flatPrefix("m_axi_").recPrefix("maxi").numPorts(self.numMst).isLastPort(True)
-    m.map()
+    ssig.fieldWidth( 40 ).indent(6).map(ssig.pmap, "s_axi_")
+    msig.isLastPort(True)
+    msig.fieldWidth( 40 ).indent(6).map(msig.pmap, "m_axi_")
     print("    );",                                                                                file = file)
-    print("end architecture rtl;",                                                                 file = file)
+    print("",                                                                                     file = file)
+
+    # map intermediate signals to records
+    # master ports first; we can use standard features to map addresses != 32
+    m = AxiPortMap( flatPrefix = "m_axi00_", recPrefix="maxi",file=file, indent=2)
+    m.filter( self._skip )
+    m.numPorts( self.numMst ).isAssign(True)
+    if self._sawidth > 32:
+      m.pruneAddr(32)
+    m.map()
+    print("",                                                                                     file = file)
+
+    m.flatPrefix("s_axi00_").recPrefix("saxi").numPorts(1).flatToRec( False )
+    m.map()
+    # extra address lines
+    if ( self._sawidth > 32 ):
+      l = self._sawidth - 1
+      nam = "s_axi00_araddr({:d} downto 32)".format( l )
+      print("  {:40s}<= saxi_araddr_hi({:d} downto 32);".format( nam, l ),                        file = file)
+      nam = "s_axi00_awaddr({:d} downto 32)".format( l )
+      print("  {:40s}<= saxi_awaddr_hi({:d} downto 32);".format( nam, l ),                        file = file)
+    print("end architecture rtl;",                                                                file = file)
 
 class AxiSubMap(AxiPortMap):
 

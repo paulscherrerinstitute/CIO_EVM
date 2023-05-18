@@ -17,6 +17,8 @@ ports.append( AxiConn.MstPort( addr = 0xA0008000, width = 14 ) )
 # EVM
 ports.append( AxiConn.MstPort( addr = 0xA8000000, width = 25 ) )
 
-xbar = AxiConn.AxiXbar( ports )
+# configure the crossbar for an address width of 40
+# which matches a the zynqmp IP
+xbar = AxiConn.AxiXbar( ports, saddrWidth=40 )
 xbar.writeTcl()
 xbar.writeHdl()
