@@ -27,3 +27,5 @@ set files [list \
 ]
 
 add_files -norecurse -fileset [get_filesets constrs_1] $files
+
+source "$origin_dir/sources_mrf_evm_dc.tcl"
