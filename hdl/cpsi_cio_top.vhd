@@ -8,10 +8,12 @@
 --Purpose     : IP block netlist
 ----------------------------------------------------------------------------------
 library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
---library UNISIM;
---use UNISIM.VCOMPONENTS.ALL;
-use work.psi_common_axi_pkg.all;
+use     IEEE.STD_LOGIC_1164.ALL;
+
+library UNISIM;
+use     UNISIM.VCOMPONENTS.ALL;
+
+use     work.psi_common_axi_pkg.all;
 
 entity cpsi_cio_top is
  generic (
@@ -129,110 +131,8 @@ entity cpsi_cio_top is
 
   attribute IO_BUFFER_TYPE : string;
 
-  attribute IO_BUFFER_TYPE of CLK_A_GTH_MSH_SFP1_N          : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_A_GTH_MSH_SFP1_P          : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_A_GTH_QSFP0_N             : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_A_GTH_QSFP0_P             : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_B_GTH_MSH_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_B_GTH_MSH_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_B_GTH_QSFP0_N             : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_B_GTH_QSFP0_P             : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_B_GTH_QSFP1_N             : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_B_GTH_QSFP1_P             : signal is "NONE";
   attribute IO_BUFFER_TYPE of CLK_A_GTH_MSH_SFP1_OUT_N      : signal is "NONE";
   attribute IO_BUFFER_TYPE of CLK_A_GTH_MSH_SFP1_OUT_P      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L1_GBT_MSH_SFP_RX_N           : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L1_GBT_MSH_SFP_RX_P           : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L1_GBT_MSH_SFP_TX_N           : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L1_GBT_MSH_SFP_TX_P           : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_A_FPGA_DP_OUT_P           : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_A_FPGA_DP_OUT_N           : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_A_LOL_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of CLK_B_LOL_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of FP_LEMO_IN_0                  : signal is "NONE";
-  attribute IO_BUFFER_TYPE of FP_LEMO_IN_1                  : signal is "NONE";
-  attribute IO_BUFFER_TYPE of FP_LEMO_EN_0                  : signal is "NONE";
-  attribute IO_BUFFER_TYPE of FP_LEMO_EN_1                  : signal is "NONE";
-  attribute IO_BUFFER_TYPE of FP_LEMO_OUT_0                 : signal is "NONE";
-  attribute IO_BUFFER_TYPE of FP_LEMO_OUT_1                 : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_RX0_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_RX0_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_RX1_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_RX1_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_RX2_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_RX2_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_RX3_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_RX3_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_TX0_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_TX0_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_TX1_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_TX1_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_TX2_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_TX2_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_TX3_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP0_TX3_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_RX0_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_RX0_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_RX1_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_RX1_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_RX2_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_RX2_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_RX3_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_RX3_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_TX0_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_TX0_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_TX1_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_TX1_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_TX2_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_TX2_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_TX3_N                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of QSFP1_TX3_P                   : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L2_MSH_GBT_RX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L2_MSH_GBT_RX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L2_MSH_GBT_TX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L2_MSH_GBT_TX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L3_MSH_GBT_RX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L3_MSH_GBT_RX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L3_MSH_GBT_TX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L3_MSH_GBT_TX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L4_MSH_GBT_RX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L4_MSH_GBT_RX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L4_MSH_GBT_TX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L4_MSH_GBT_TX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L5_MSH_GBT_RX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L5_MSH_GBT_RX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L5_MSH_GBT_TX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L5_MSH_GBT_TX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L6_MSH_GBT_RX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L6_MSH_GBT_RX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L6_MSH_GBT_TX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L6_MSH_GBT_TX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L7_MSH_GBT_RX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L7_MSH_GBT_RX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L7_MSH_GBT_TX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L7_MSH_GBT_TX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L8_MSH_GBT_RX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L8_MSH_GBT_RX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L8_MSH_GBT_TX_N               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of L8_MSH_GBT_TX_P               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of ME_FPI_LED_SDTI               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of ME_FPI_LED_SCKI               : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_04_P                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_05_P                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_06_P                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_07_P                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_08_P                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_09_P                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_10_P                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_11_P                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_12_P                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_12_N                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_13_P                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_13_N                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_14_P                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_14_N                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_15_P                      : signal is "NONE";
-  attribute IO_BUFFER_TYPE of RIO_15_N                      : signal is "NONE";
 end entity cpsi_cio_top;
 
 architecture STRUCTURE of cpsi_cio_top is
@@ -263,11 +163,12 @@ architecture STRUCTURE of cpsi_cio_top is
   signal trigOut                               : std_logic_vector(N_TRIGS_C    - 1 downto 0)         := (others => '0');
 
   signal delayClk                              : std_logic := '0';
+
 begin
 
   irq <= (others => '0');
 
-  PS_i: entity work.ZynqMpPSWrapper
+  i_ps_wrp: entity work.ZynqMpPSWrapper
     port map (
       axi_aclk                          => axiClk,
       axi_peripheral_reset              => axiRst,
@@ -278,7 +179,7 @@ begin
       axi_sm                            => axi_sm
     );
 
-  XBar_i : entity work.AxiXbarWrapper
+  i_axi_xbar_wrp : entity work.AxiXbarWrapper
     port map (
       axi_aclk                          => axiClk,
       axi_aresetn                       => axiRstb,
@@ -288,7 +189,7 @@ begin
       maxi_sm                           => maxi_sm
     );
 
-  FwId_i : entity work.AxiFwVersionWrapper
+  i_fw_id_wrp : entity work.AxiFwVersionWrapper
     generic map (
       C_ID_FACILITY                     => G_ID_FACILITY,
       C_ID_PROJECT                      => G_ID_PROJECT,
@@ -306,7 +207,7 @@ begin
       axi_sm                            => maxi_sm(FW_ID_IDX_C)
     );
 
-  ClkMeas_i : entity work.ClkMeasureWrapper
+  i_clk_meas_wrp : entity work.ClkMeasureWrapper
     generic map (
       NumOfClocks_g                     => clocks'length,
       AxiClkFreq_g                      => 125_000_000,
@@ -322,7 +223,7 @@ begin
       axi_sm                            => maxi_sm(CLKMS_IDX_C)
     );
 
-  Tim320Trig_i : entity work.Tim320TriggerWrapper
+  i_tim320_wrp : entity work.Tim320TriggerWrapper
     generic map (
       C_S00_AXI_ADDR_WIDTH => 14,
       C_NUM_TRIGGERS       => trigInp'length
@@ -338,8 +239,330 @@ begin
       axi_sm                            => maxi_sm(T_DLY_IDX_C)
     );
 
-  maxi_sm(FLEMO_IDX_C) <= C_AXI_SM_DEF;
+  b_evm : block is
 
-  maxi_sm(EVM_IDX_C)   <= C_AXI_SM_DEF;
+  signal CLK_A_GTH_MSH_SFP1_GT                 : std_logic;
+  signal CLK_A_GTH_QSFP0_GT                    : std_logic;
+  signal CLK_B_GTH_MSH_GT                      : std_logic;
+  signal CLK_B_GTH_QSFP0_GT                    : std_logic;
+  signal CLK_B_GTH_QSFP1_GT                    : std_logic;
+
+  signal CLK_A_GTH_MSH_SFP1                    : std_logic;
+  signal CLK_A_GTH_MSH_SFP1_ODIV2              : std_logic;
+  signal CLK_A_GTH_QSFP0                       : std_logic;
+  signal CLK_A_GTH_QSFP0_ODIV2                 : std_logic;
+  signal CLK_B_GTH_QSFP0                       : std_logic;
+  signal CLK_B_GTH_QSFP0_ODIV2                 : std_logic;
+  signal CLK_B_GTH_QSFP1                       : std_logic;
+  signal CLK_B_GTH_QSFP1_ODIV2                 : std_logic;
+  signal CLK_B_GTH_MSH                         : std_logic;
+  signal CLK_B_GTH_MSH_ODIV2                   : std_logic;
+
+  signal slv_fanout_mgt_qsfp0_rx_p             : std_logic_vector(3 downto 0);
+  signal slv_fanout_mgt_qsfp0_rx_n             : std_logic_vector(3 downto 0);
+  signal slv_fanout_mgt_qsfp0_tx_p             : std_logic_vector(3 downto 0);
+  signal slv_fanout_mgt_qsfp0_tx_n             : std_logic_vector(3 downto 0);
+
+  signal slv_fanout_mgt_qsfp1_rx_p             : std_logic_vector(3 downto 0);
+  signal slv_fanout_mgt_qsfp1_rx_n             : std_logic_vector(3 downto 0);
+  signal slv_fanout_mgt_qsfp1_tx_p             : std_logic_vector(3 downto 0);
+  signal slv_fanout_mgt_qsfp1_tx_n             : std_logic_vector(3 downto 0);
+
+  signal slv_fanout_mgt_p6_8765_rx_p           : std_logic_vector(3 downto 0);
+  signal slv_fanout_mgt_p6_8765_rx_n           : std_logic_vector(3 downto 0);
+  signal slv_fanout_mgt_p6_8765_tx_p           : std_logic_vector(3 downto 0);
+  signal slv_fanout_mgt_p6_8765_tx_n           : std_logic_vector(3 downto 0);
+
+  signal slv_fanout_mgt_p6_4321_rx_p           : std_logic_vector(3 downto 0);
+  signal slv_fanout_mgt_p6_4321_rx_n           : std_logic_vector(3 downto 0);
+  signal slv_fanout_mgt_p6_4321_tx_p           : std_logic_vector(3 downto 0);
+  signal slv_fanout_mgt_p6_4321_tx_n           : std_logic_vector(3 downto 0);
+
+  signal CLKSYN                                : std_logic;
+
+  begin
+
+  i_ibufds_0   : component IBUFDS_GTE4
+    generic map (
+      REFCLK_HROW_CK_SEL                => "00"
+    )
+    port map (
+      I                                 => CLK_A_GTH_MSH_SFP1_P,
+      IB                                => CLK_A_GTH_MSH_SFP1_N,
+      CEB                               => '0',
+      O                                 => CLK_A_GTH_MSH_SFP1_GT,
+      ODIV2                             => CLK_A_GTH_MSH_SFP1_ODIV2
+    );
+
+  i_ibufds_1   : component IBUFDS_GTE4
+    generic map (
+      REFCLK_HROW_CK_SEL                => "00"
+    )
+    port map (
+      I                                 => CLK_A_GTH_QSFP0_P,
+      IB                                => CLK_A_GTH_QSFP0_N,
+      CEB                               => '0',
+      O                                 => CLK_A_GTH_QSFP0_GT,
+      ODIV2                             => CLK_A_GTH_QSFP0_ODIV2
+    );
+
+  i_ibufds_2   : component IBUFDS_GTE4
+    generic map (
+      REFCLK_HROW_CK_SEL                => "00"
+    )
+    port map (
+      I                                 => CLK_B_GTH_QSFP0_P,
+      IB                                => CLK_B_GTH_QSFP0_N,
+      CEB                               => '0',
+      O                                 => CLK_B_GTH_QSFP0_GT,
+      ODIV2                             => CLK_B_GTH_QSFP0_ODIV2
+    );
+
+  i_ibufds_3   : component IBUFDS_GTE4
+    generic map (
+      REFCLK_HROW_CK_SEL                => "00"
+    )
+    port map (
+      I                                 => CLK_B_GTH_QSFP1_P,
+      IB                                => CLK_B_GTH_QSFP1_N,
+      CEB                               => '0',
+      O                                 => CLK_B_GTH_QSFP1_GT,
+      ODIV2                             => CLK_B_GTH_QSFP1_ODIV2
+    );
+
+  i_ibufds_4   : component IBUFDS_GTE4
+    generic map (
+      REFCLK_HROW_CK_SEL                => "00"
+    )
+    port map (
+      I                                 => CLK_B_GTH_MSH_P,
+      IB                                => CLK_B_GTH_MSH_N,
+      CEB                               => '0',
+      O                                 => CLK_B_GTH_MSH_GT,
+      ODIV2                             => CLK_B_GTH_MSH_ODIV2
+    );
+
+  i_bufg_0     : component BUFG_GT
+    port map (
+      I                                 => CLK_A_GTH_MSH_SFP1_ODIV2,
+      O                                 => CLK_A_GTH_MSH_SFP1,
+      CE                                => '1',
+      CEMASK                            => '0',
+      CLR                               => '0',
+      CLRMASK                           => '0',
+      DIV                               => "000"
+    );
+
+  i_bufg_1     : component BUFG_GT
+    port map (
+      I                                 => CLK_A_GTH_QSFP0_ODIV2,
+      O                                 => CLK_A_GTH_QSFP0,
+      CE                                => '1',
+      CEMASK                            => '0',
+      CLR                               => '0',
+      CLRMASK                           => '0',
+      DIV                               => "000"
+    );
+
+  i_bufg_2     : component BUFG_GT
+    port map (
+      I                                 => CLK_B_GTH_QSFP0_ODIV2,
+      O                                 => CLK_B_GTH_QSFP0,
+      CE                                => '1',
+      CEMASK                            => '0',
+      CLR                               => '0',
+      CLRMASK                           => '0',
+      DIV                               => "000"
+    );
+
+  i_bufg_3     : component BUFG_GT
+    port map (
+      I                                 => CLK_B_GTH_QSFP1_ODIV2,
+      O                                 => CLK_B_GTH_QSFP1,
+      CE                                => '1',
+      CEMASK                            => '0',
+      CLR                               => '0',
+      CLRMASK                           => '0',
+      DIV                               => "000"
+    );
+
+  i_bufg_4     : component BUFG_GT
+    port map (
+      I                                 => CLK_B_GTH_MSH_ODIV2,
+      O                                 => CLK_B_GTH_MSH,
+      CE                                => '1',
+      CEMASK                            => '0',
+      CLR                               => '0',
+      CLRMASK                           => '0',
+      DIV                               => "000"
+    );
+
+  i_obufds_syn : component OBUFDS
+    port map (
+      I                                 => CLKSYN,
+      O                                 => CLK_A_FPGA_DP_OUT_P,
+      OB                                => CLK_A_FPGA_DP_OUT_N
+    );
+
+  -- qsfp0, mgt128, x0y1
+  slv_fanout_mgt_qsfp0_rx_p(0)          <= QSFP0_RX0_P;
+  slv_fanout_mgt_qsfp0_rx_n(0)          <= QSFP0_RX0_N;
+  slv_fanout_mgt_qsfp0_rx_p(1)          <= QSFP0_RX1_P;
+  slv_fanout_mgt_qsfp0_rx_n(1)          <= QSFP0_RX1_N;
+  slv_fanout_mgt_qsfp0_rx_p(2)          <= QSFP0_RX2_P;
+  slv_fanout_mgt_qsfp0_rx_n(2)          <= QSFP0_RX2_N;
+  slv_fanout_mgt_qsfp0_rx_p(3)          <= QSFP0_RX3_P;
+  slv_fanout_mgt_qsfp0_rx_n(3)          <= QSFP0_RX3_N;
+
+  -- qsfp1, mgt228, x1y1
+  slv_fanout_mgt_qsfp1_rx_p(0)          <= QSFP1_RX0_P;
+  slv_fanout_mgt_qsfp1_rx_n(0)          <= QSFP1_RX0_N;
+  slv_fanout_mgt_qsfp1_rx_p(1)          <= QSFP1_RX1_P;
+  slv_fanout_mgt_qsfp1_rx_n(1)          <= QSFP1_RX1_N;
+  slv_fanout_mgt_qsfp1_rx_p(2)          <= QSFP1_RX2_P;
+  slv_fanout_mgt_qsfp1_rx_n(2)          <= QSFP1_RX2_N;
+  slv_fanout_mgt_qsfp1_rx_p(3)          <= QSFP1_RX3_P;
+  slv_fanout_mgt_qsfp1_rx_n(3)          <= QSFP1_RX3_N;
+
+  -- p6, port 8,7,6,5, mgt228 x1y3
+  -- note the inverse mapping (0..3 -> 8..5)
+  slv_fanout_mgt_p6_8765_rx_p(0)        <= L8_MSH_GBT_RX_P;
+  slv_fanout_mgt_p6_8765_rx_n(0)        <= L8_MSH_GBT_RX_N;
+  slv_fanout_mgt_p6_8765_rx_p(1)        <= L7_MSH_GBT_RX_P;
+  slv_fanout_mgt_p6_8765_rx_n(1)        <= L7_MSH_GBT_RX_N;
+  slv_fanout_mgt_p6_8765_rx_p(2)        <= L6_MSH_GBT_RX_P;
+  slv_fanout_mgt_p6_8765_rx_n(2)        <= L6_MSH_GBT_RX_N;
+  slv_fanout_mgt_p6_8765_rx_p(3)        <= L5_MSH_GBT_RX_P;
+  slv_fanout_mgt_p6_8765_rx_n(3)        <= L5_MSH_GBT_RX_N;
+
+  -- p6, port 4,3,2, SFP; mgt228 x1y2
+  -- note the inverse mapping (0..3 -> 4..1)
+  slv_fanout_mgt_p6_4321_rx_p(0)        <= L1_GBT_MSH_SFP_RX_P;
+  slv_fanout_mgt_p6_4321_rx_n(0)        <= L1_GBT_MSH_SFP_RX_N;
+  slv_fanout_mgt_p6_4321_rx_p(1)        <= L2_MSH_GBT_RX_P;
+  slv_fanout_mgt_p6_4321_rx_n(1)        <= L2_MSH_GBT_RX_N;
+  slv_fanout_mgt_p6_4321_rx_p(2)        <= L3_MSH_GBT_RX_P;
+  slv_fanout_mgt_p6_4321_rx_n(2)        <= L3_MSH_GBT_RX_N;
+  slv_fanout_mgt_p6_4321_rx_p(3)        <= L4_MSH_GBT_RX_P;
+  slv_fanout_mgt_p6_4321_rx_n(3)        <= L4_MSH_GBT_RX_N;
+
+  -- qsfp0, mgt128, x0y1
+  QSFP0_TX0_P                           <=   slv_fanout_mgt_qsfp0_tx_p(0);
+  QSFP0_TX0_N                           <=   slv_fanout_mgt_qsfp0_tx_n(0);
+  QSFP0_TX1_P                           <=   slv_fanout_mgt_qsfp0_tx_p(1);
+  QSFP0_TX1_N                           <=   slv_fanout_mgt_qsfp0_tx_n(1);
+  QSFP0_TX2_P                           <=   slv_fanout_mgt_qsfp0_tx_p(2);
+  QSFP0_TX2_N                           <=   slv_fanout_mgt_qsfp0_tx_n(2);
+  QSFP0_TX3_P                           <=   slv_fanout_mgt_qsfp0_tx_p(3);
+  QSFP0_TX3_N                           <=   slv_fanout_mgt_qsfp0_tx_n(3);
+
+  -- qsfp1, mgt228, x1y1
+  QSFP1_TX0_P                           <=   slv_fanout_mgt_qsfp1_tx_p(0);
+  QSFP1_TX0_N                           <=   slv_fanout_mgt_qsfp1_tx_n(0);
+  QSFP1_TX1_P                           <=   slv_fanout_mgt_qsfp1_tx_p(1);
+  QSFP1_TX1_N                           <=   slv_fanout_mgt_qsfp1_tx_n(1);
+  QSFP1_TX2_P                           <=   slv_fanout_mgt_qsfp1_tx_p(2);
+  QSFP1_TX2_N                           <=   slv_fanout_mgt_qsfp1_tx_n(2);
+  QSFP1_TX3_P                           <=   slv_fanout_mgt_qsfp1_tx_p(3);
+  QSFP1_TX3_N                           <=   slv_fanout_mgt_qsfp1_tx_n(3);
+
+  -- p6, port 8,7,6,5, mgt228 x1y3
+  -- note the inverse mapping (0..3 -> 8..5)
+  L8_MSH_GBT_TX_P                       <=   slv_fanout_mgt_p6_8765_tx_p(0);
+  L8_MSH_GBT_TX_N                       <=   slv_fanout_mgt_p6_8765_tx_n(0);
+  L7_MSH_GBT_TX_P                       <=   slv_fanout_mgt_p6_8765_tx_p(1);
+  L7_MSH_GBT_TX_N                       <=   slv_fanout_mgt_p6_8765_tx_n(1);
+  L6_MSH_GBT_TX_P                       <=   slv_fanout_mgt_p6_8765_tx_p(2);
+  L6_MSH_GBT_TX_N                       <=   slv_fanout_mgt_p6_8765_tx_n(2);
+  L5_MSH_GBT_TX_P                       <=   slv_fanout_mgt_p6_8765_tx_p(3);
+  L5_MSH_GBT_TX_N                       <=   slv_fanout_mgt_p6_8765_tx_n(3);
+
+  -- p6, port 4,3,2, SFP; mgt228 x1y2
+  -- note the inverse mapping (0..3 -> 4..1)
+  L1_GBT_MSH_SFP_TX_P                   <=   slv_fanout_mgt_p6_4321_tx_p(0);
+  L1_GBT_MSH_SFP_TX_N                   <=   slv_fanout_mgt_p6_4321_tx_n(0);
+  L2_MSH_GBT_TX_P                       <=   slv_fanout_mgt_p6_4321_tx_p(1);
+  L2_MSH_GBT_TX_N                       <=   slv_fanout_mgt_p6_4321_tx_n(1);
+  L3_MSH_GBT_TX_P                       <=   slv_fanout_mgt_p6_4321_tx_p(2);
+  L3_MSH_GBT_TX_N                       <=   slv_fanout_mgt_p6_4321_tx_n(2);
+  L4_MSH_GBT_TX_P                       <=   slv_fanout_mgt_p6_4321_tx_p(3);
+  L4_MSH_GBT_TX_N                       <=   slv_fanout_mgt_p6_4321_tx_n(3);
+
+  i_evm_wrp : entity work.EvmWrapper
+    port map (
+      CLK_A_GTH_MSH_SFP1        => CLK_A_GTH_MSH_SFP1,
+      CLK_B_GTH_QSFP1           => CLK_B_GTH_QSFP1,
+      CLK_A_GTH_QSFP0           => CLK_A_GTH_QSFP0,
+      CLK_B_GTH_QSFP0           => CLK_B_GTH_QSFP0,
+      CLK_B_GTH_MSH             => CLK_B_GTH_MSH,
+      CLK_A_GTH_MSH_SFP1_GT     => CLK_A_GTH_MSH_SFP1_GT,
+      CLK_B_GTH_QSFP1_GT        => CLK_B_GTH_QSFP1_GT,
+      CLK_A_GTH_QSFP0_GT        => CLK_A_GTH_QSFP0_GT,
+      CLK_B_GTH_QSFP0_GT        => CLK_B_GTH_QSFP0_GT,
+      CLK_B_GTH_MSH_GT          => CLK_B_GTH_MSH_GT,
+
+      CLK_A_LOL_N               => CLK_A_LOL_N,
+      CLK_B_LOL_N               => CLK_B_LOL_N,
+
+
+      i_fanout_mgt_qsfp0_rx_p   => slv_fanout_mgt_qsfp0_rx_p,
+      i_fanout_mgt_qsfp0_rx_n   => slv_fanout_mgt_qsfp0_rx_n,
+      o_fanout_mgt_qsfp0_tx_p   => slv_fanout_mgt_qsfp0_tx_p,
+      o_fanout_mgt_qsfp0_tx_n   => slv_fanout_mgt_qsfp0_tx_n,
+
+      i_fanout_mgt_qsfp1_rx_p   => slv_fanout_mgt_qsfp1_rx_p,
+      i_fanout_mgt_qsfp1_rx_n   => slv_fanout_mgt_qsfp1_rx_n,
+      o_fanout_mgt_qsfp1_tx_p   => slv_fanout_mgt_qsfp1_tx_p,
+      o_fanout_mgt_qsfp1_tx_n   => slv_fanout_mgt_qsfp1_tx_n,
+
+      i_fanout_mgt_p6_8765_rx_p => slv_fanout_mgt_p6_8765_rx_p,
+      i_fanout_mgt_p6_8765_rx_n => slv_fanout_mgt_p6_8765_rx_n,
+      o_fanout_mgt_p6_8765_tx_p => slv_fanout_mgt_p6_8765_tx_p,
+      o_fanout_mgt_p6_8765_tx_n => slv_fanout_mgt_p6_8765_tx_n,
+
+      i_fanout_mgt_p6_432_rx_p  => slv_fanout_mgt_p6_4321_rx_p,
+      i_fanout_mgt_p6_432_rx_n  => slv_fanout_mgt_p6_4321_rx_n,
+      o_fanout_mgt_p6_432_tx_p  => slv_fanout_mgt_p6_4321_tx_p,
+      o_fanout_mgt_p6_432_tx_n  => slv_fanout_mgt_p6_4321_tx_n,
+
+      CLKSYN                    => CLKSYN,
+
+      LED_SDT                   => ME_FPI_LED_SDTI,
+      LED_SCK                   => ME_FPI_LED_SCKI,
+
+      FP_LEMO_IN_0              => FP_LEMO_IN_0,
+      FP_LEMO_IN_1              => FP_LEMO_IN_1,
+      TBIN(0)                   => RIO_04_P,
+      TBIN(1)                   => RIO_05_P,
+      TBIN(2)                   => RIO_06_P,
+      TBIN(3)                   => RIO_07_P,
+      TBIN(4)                   => RIO_08_P,
+      TBIN(5)                   => RIO_09_P,
+      TBIN(6)                   => RIO_10_P,
+      TBIN(7)                   => RIO_11_P,
+
+      axi_aclk                 => axiClk,
+      axi_aresetn              => axiRstb,
+      axi_ms                   => maxi_ms( EVM_IDX_C ),
+      axi_sm                   => maxi_sm( EVM_IDX_C )
+    );
+
+  FP_LEMO_EN_0         <= '1';
+  FP_LEMO_EN_1         <= '1';
+  FP_LEMO_OUT_0        <= '0';
+  FP_LEMO_OUT_1        <= '0';
+
+  RIO_12_P             <= '0'; -- L_DIR_0 Low B->A; input
+  RIO_12_N             <= '0'; -- L_DIR_1 Low B->A; input
+  RIO_13_P             <= '0'; -- L_DIR_2 Low B->A; input
+  RIO_13_N             <= '0'; -- L_DIR_3 Low B->A; input
+  RIO_14_P             <= '0'; -- L_DIR_4 Low B->A; input
+  RIO_14_N             <= '0'; -- L_DIR_5 Low B->A; input
+  RIO_15_P             <= '0'; -- L_DIR_6 Low B->A; input
+  RIO_15_N             <= '0'; -- L_DIR_7 Low B->A; input
+
+  end block b_evm;
+
+  maxi_sm(FLEMO_IDX_C) <= C_AXI_SM_DEF;
 
 end architecture STRUCTURE;
