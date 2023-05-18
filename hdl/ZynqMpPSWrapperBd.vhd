@@ -7,12 +7,12 @@ use     work.psi_common_axi_pkg.all;
 entity ZynqMpPSWrapper is
   port (
     axi_aclk                 : out std_logic;
-    aux_rstb_in              : in  std_logic   := '1';
+    aux_rstb                 : in  std_logic   := '1';
     axi_iconn_aresetn        : out std_logic;
     axi_peripheral_aresetn   : out std_logic;
     axi_peripheral_reset     : out std_logic;
     dcm_locked               : in  std_logic   := '1';
-    mb_debug_sys_rst_in      : in  std_logic   := '0';
+    mb_debug_sys_rst         : in  std_logic   := '0';
     pl_ps_irq0               : in  std_logic_vector ( 7 downto 0 ) := (others => '0');
     pl_ps_irq1               : in  std_logic_vector ( 7 downto 0 ) := (others => '0');
     axi_ms                   : out rec_axi_ms;
@@ -82,13 +82,13 @@ begin
 
   U_CPSI_CIO : component CPSI_CIO
     port map (
-      aux_rstb_in              => aux_rstb_in,
+      aux_rstb_in              => aux_rstb,
       axi_aclk                 => axi_aclk,
       axi_iconn_aresetn(0)     => axi_iconn_aresetn,
       axi_peripheral_aresetn(0)=> axi_peripheral_aresetn,
       axi_peripheral_reset(0)  => axi_peripheral_reset,
       dcm_locked               => dcm_locked,
-      mb_debug_sys_rst_in      => mb_debug_sys_rst_in,
+      mb_debug_sys_rst_in      => mb_debug_sys_rst,
       pl_ps_irq0               => pl_ps_irq0,
       pl_ps_irq1               => pl_ps_irq1,
       axi_m00_awaddr           => axi_ms.aw.addr,
