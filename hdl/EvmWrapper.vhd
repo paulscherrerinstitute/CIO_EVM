@@ -20,13 +20,6 @@ entity EvmWrapper is
     CLK_A_LOL_N            : in std_logic;
     CLK_B_LOL_N            : in std_logic;
 
-    CLK_A_GTH_MSH_SFP1_OUT : out std_logic;
-
---    MGT_UPLINK_RX_P : in STD_LOGIC;
---    MGT_UPLINK_RX_N : in STD_LOGIC;
---    MGT_UPLINK_TX_P : out STD_LOGIC;
---    MGT_UPLINK_TX_N : out STD_LOGIC;
-
     i_fanout_mgt_qsfp0_rx_p : in STD_LOGIC_VECTOR ( 3 downto 0 );
     i_fanout_mgt_qsfp0_rx_n : in STD_LOGIC_VECTOR ( 3 downto 0 );
     o_fanout_mgt_qsfp0_tx_p : out STD_LOGIC_VECTOR ( 3 downto 0 );
@@ -54,28 +47,40 @@ entity EvmWrapper is
 
     FP_LEMO_IN_0             : in std_logic;
     FP_LEMO_IN_1             : in std_logic;
-    TBIN                     : in std_logic_vector(0 to 7)
+    TBIN                     : in std_logic_vector(0 to 7);
 
     axi_aclk                 : in  std_logic;
     axi_aresetn              : in  std_logic;
     axi_ms                   : in  rec_axi_ms;
-    axi_sm                   : in  rec_axi_sm;
+    axi_sm                   : out rec_axi_sm
   );
 end entity EvmWrapper;
 
 architecture Mapping of EvmWrapper is
+
+  signal axi_wdata_int            : std_logic_vector(63 downto 0);
+  signal axi_wstrb_int            : std_logic_vector( 7 downto 0);
+  signal axi_rdata_int            : std_logic_vector(63 downto 0);
 begin
 
-  EVM_i : entity work.evm_cio
+  -- data width is hardcoded to 64 (despite generic) even though
+  -- internally only 32 bits are supported.
+  axi_wstrb_int( 7 downto  4)     <= (others => '0');
+  axi_wstrb_int( 3 downto  0)     <= axi_ms.dw.strb;
+  axi_wdata_int(63 downto 32)     <= (others => '0');
+  axi_wdata_int(31 downto  0)     <= axi_ms.dw.data;
+
+  axi_sm.dr.data                  <= axi_rdata_int(31 downto 0);
+
+  i_evm : entity work.evm_cio
     generic map (
       C_S00_AXI_ID_WIDTH          => C_S_AXI_ID_WIDTH,
-      C_S00_AXI_DATA_WIDTH        => C_S_AXI_DATA_WIDTH,
       C_S00_AXI_ADDR_WIDTH        => C_S_AXI_ADDR_WIDTH,
       C_S00_AXI_ARUSER_WIDTH      => C_S_AXI_ARUSER_WIDTH,
       C_S00_AXI_RUSER_WIDTH       => C_S_AXI_RUSER_WIDTH,
       C_S00_AXI_AWUSER_WIDTH      => C_S_AXI_AWUSER_WIDTH,
       C_S00_AXI_WUSER_WIDTH       => C_S_AXI_WUSER_WIDTH,
-      C_S00_AXI_BUSER_WIDTH       => C_S_AXI_BUSER_WIDTH,
+      C_S00_AXI_BUSER_WIDTH       => C_S_AXI_BUSER_WIDTH
     )
     port map (
       CLK_A_GTH_MSH_SFP1          => CLK_A_GTH_MSH_SFP1,
@@ -91,8 +96,6 @@ begin
 
       CLK_A_LOL_N                 => CLK_A_LOL_N,
       CLK_B_LOL_N                 => CLK_B_LOL_N,
-
-      CLK_A_GTH_MSH_SFP1_OUT      => CLK_A_GTH_MSH_SFP1_OUT,
 
       i_fanout_mgt_qsfp0_rx_p     => i_fanout_mgt_qsfp0_rx_p,
       i_fanout_mgt_qsfp0_rx_n     => i_fanout_mgt_qsfp0_rx_n,
@@ -134,11 +137,10 @@ begin
       s00_axi_awlock              => axi_ms.aw.lock,
       s00_axi_awcache             => axi_ms.aw.cache,
       s00_axi_awprot              => axi_ms.aw.prot,
-      s00_axi_awuser              => axi_ms.aw.user,
       s00_axi_awvalid             => axi_ms.aw.valid,
       s00_axi_awready             => axi_sm.aw.ready,
-      s00_axi_wdata               => axi_ms.dw.data,
-      s00_axi_wstrb               => axi_ms.dw.strb,
+      s00_axi_wdata               => axi_wdata_int,
+      s00_axi_wstrb               => axi_wstrb_int,
       s00_axi_wlast               => axi_ms.dw.last,
       s00_axi_wvalid              => axi_ms.dw.valid,
       s00_axi_wready              => axi_sm.dw.ready,
@@ -153,13 +155,12 @@ begin
       s00_axi_arlock              => axi_ms.ar.lock,
       s00_axi_arcache             => axi_ms.ar.cache,
       s00_axi_arprot              => axi_ms.ar.prot,
-      s00_axi_aruser              => axi_ms.ar.user,
       s00_axi_arvalid             => axi_ms.ar.valid,
       s00_axi_arready             => axi_sm.ar.ready,
-      s00_axi_rdata               => axi_sm.dr.data,
+      s00_axi_rdata               => axi_rdata_int,
       s00_axi_rresp               => axi_sm.dr.resp,
       s00_axi_rlast               => axi_sm.dr.last,
       s00_axi_rvalid              => axi_sm.dr.valid,
       s00_axi_rready              => axi_ms.dr.ready
     );
-end EvmWrapper;
+end architecture Mapping;
