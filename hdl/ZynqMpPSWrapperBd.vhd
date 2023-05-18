@@ -15,6 +15,8 @@ entity ZynqMpPSWrapper is
     mb_debug_sys_rst         : in  std_logic   := '0';
     pl_ps_irq0               : in  std_logic_vector ( 7 downto 0 ) := (others => '0');
     pl_ps_irq1               : in  std_logic_vector ( 7 downto 0 ) := (others => '0');
+    axi_ms_awaddr_hi         : out std_logic_vector(39 downto 32);
+    axi_ms_araddr_hi         : out std_logic_vector(39 downto 32);
     axi_ms                   : out rec_axi_ms;
     axi_sm                   : in  rec_axi_sm
   );
@@ -77,8 +79,10 @@ architecture rtl of ZynqMpPSWrapper is
 
 begin
 
-  axi_ms.aw.user <= axi_ms_aw_user( axi_ms.aw.user'range );
-  axi_ms.ar.user <= axi_ms_ar_user( axi_ms.ar.user'range );
+  axi_ms_awaddr_hi <= (others => '0');
+  axi_ms_araddr_hi <= (others => '0');
+  axi_ms.aw.user   <= axi_ms_aw_user( axi_ms.aw.user'range );
+  axi_ms.ar.user   <= axi_ms_ar_user( axi_ms.ar.user'range );
 
   U_CPSI_CIO : component CPSI_CIO
     port map (

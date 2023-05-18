@@ -14,4 +14,5 @@ set_property -dict [list \
   CONFIG.M04_A00_BASE_ADDR  {0x00000000a8000000} \
   CONFIG.M04_A00_ADDR_WIDTH {25} \
   CONFIG.NUM_MI {5} \
+  CONFIG.ADDR_WIDTH {40} \
 ] [get_ips AxiXBar]

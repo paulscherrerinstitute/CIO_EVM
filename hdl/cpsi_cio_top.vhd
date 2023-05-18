@@ -164,6 +164,9 @@ architecture STRUCTURE of cpsi_cio_top is
 
   signal delayClk                              : std_logic := '0';
 
+  signal axi_ms_araddr_hi                      : std_logic_vector(39 downto 32);
+  signal axi_ms_awaddr_hi                      : std_logic_vector(39 downto 32);
+
 begin
 
   irq <= (others => '0');
@@ -175,6 +178,8 @@ begin
       axi_peripheral_aresetn            => axiRstb,
       pl_ps_irq0                        => irq( 7 downto 0),
       pl_ps_irq1                        => irq(15 downto 8),
+      axi_ms_araddr_hi                  => axi_ms_araddr_hi,
+      axi_ms_awaddr_hi                  => axi_ms_awaddr_hi,
       axi_ms                            => axi_ms,
       axi_sm                            => axi_sm
     );
@@ -183,6 +188,8 @@ begin
     port map (
       axi_aclk                          => axiClk,
       axi_aresetn                       => axiRstb,
+      saxi_araddr_hi                    => axi_ms_araddr_hi,
+      saxi_awaddr_hi                    => axi_ms_awaddr_hi,
       saxi_ms                           => axi_ms,
       saxi_sm                           => axi_sm,
       maxi_ms                           => maxi_ms,

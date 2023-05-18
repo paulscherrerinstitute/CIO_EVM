@@ -3,7 +3,7 @@ set files [list \
   [file normalize "$origin_dir/../hdl/cpsi_cio_top.vhd"] \
   [file normalize "$origin_dir/../hdl/AxiFwVersionWrapper.vhd"] \
   [file normalize "$origin_dir/../hdl/AxiXBarWrapper.vhd"] \
-  [file normalize "$origin_dir/../hdl/ZynqMpPSWrapperBd.vhd"] \
+  [file normalize "$origin_dir/../hdl/ZynqMpPSWrapper.vhd"] \
   [file normalize "$origin_dir/../hdl/ClkMeasureWrapper.vhd"] \
   [file normalize "$origin_dir/../hdl/Tim320TriggerWrapper.vhd"] \
   [file normalize "$origin_dir/../hdl/EvmWrapper.vhd"] \
