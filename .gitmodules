@@ -10,3 +10,6 @@
 [submodule "modules/fw_version_id"]
 	path = modules/fw_version_id
 	url = https://github.com/paulscherrerinstitute/fw_version_id
+[submodule "modules/mrf-evm-dc"]
+	path = modules/mrf-evm-dc
+	url = git@github.com:paulscherrerinstitute/mrf-evm-dc
