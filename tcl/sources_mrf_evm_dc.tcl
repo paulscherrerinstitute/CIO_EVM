@@ -66,4 +66,4 @@ set files [list \
 
 add_files -norecurse -fileset [get_filesets constrs_1] $files
 set_property USED_IN_SYNTHESIS 0 [get_files ${files}]
-set_property SCOPED_TO_REF evm_cio [get_files ${files}]
+set_property SCOPED_TO_REF EvmWrapper [get_files ${files}]
