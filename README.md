@@ -80,10 +80,13 @@ directories and files:
 
 ### EVM Notes
 
-Some top-level files of the EVM module are unused
+Some files of the EVM module are unused
 
  - `CPSI_CIO_top.vhd` is unused; the top-level entity is now part of this project
    (under `hdl/`).
+ - `fifo80x2048.xci` is unused.
+   The FIFO IP is generated from TCL (`tcl/sources_mrf_evm_dc.tcl`).
+ - `ila_0.xci` is unused. The ILA IP is generated from TCL (`tcl/sources_mrf_evm_dc.tcl`).
 
 Note also that `mrf-evm-dc` uses its own git submodules - albeit not for the CPSI_CIO
 variant. These submodules are not part of this project and are unused but be aware that
