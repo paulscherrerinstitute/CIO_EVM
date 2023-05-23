@@ -100,3 +100,19 @@ directory:
   4. wait for the GUI to update
   5. proceed to synthesis/implementation etc.
   
+## Modifications
+
+Modifications of the project in the GUI must be properly propagated to the TCL scripts.
+Observe the TCL console when changing anyhthing in the GUI: this helps identifying
+settings that have changed.
+
+  1. Changing project parameters (device, synthesis or implementation strategies or other
+     settings) are merged into `generateProject.tcl`.
+  2. Modifying IP settings are merged into the IP-generating TCL script(s). A special
+     case is the AXI Crossbar which can be created from the expert python script along
+     with the wrapper HDL.
+  3. Changes to the set of source files or constraints are propagated into the `sources.tcl`
+     (CIO environment; top-level etc.) or `sources_mrf_evm_dc.tcl` (EVM-proper) scripts.
+
+Note that the names of the top-level ports must not be changed since they are referred-
+to from the MRF-supplied constraints file.
