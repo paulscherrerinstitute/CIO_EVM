@@ -30,7 +30,8 @@ if { [info exists ::origin_dir_loc] } {
 }
 
 # Set the project name
-set _xil_proj_name_ "[file tail [pwd]]_project"
+set _xil_proj_name_ "[file tail [file normalize {${origin_dir}/../}]]_project"
+
 set project_part    "xczu6cg-ffvc900-1-e"
 # Use project name variable, if specified in the tcl shell
 if { [info exists ::user_project_name] } {
