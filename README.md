@@ -69,7 +69,7 @@ directories and files:
     - for instantiating various IP
     - adding source and constraint files to the project (`sources.tcl`)
     - adding the MRF EVM sources to the project (all references to MRF-provided
-      code and generics are listed in `sources_mrf_evm_dc.tcl`
+      code and constraints are listed in `sources_mrf_evm_dc.tcl`
     - `generateProject.tcl` creates the actual project and executes all the other
       TCL scripts to populate it.
   - `xdc/` contains constraints
@@ -82,7 +82,8 @@ directories and files:
 
 Some top-level files of the EVM module are unused
 
- - `CPSI_CIO_top.vhd` is unused; the top-level entity is now part of the project.
+ - `CPSI_CIO_top.vhd` is unused; the top-level entity is now part of this project
+   (under `hdl/`).
 
 Note also that `mrf-evm-dc` uses its own git submodules - albeit not for the CPSI_CIO
 variant. These submodules are not part of this project and are unused but be aware that
@@ -106,7 +107,7 @@ Modifications of the project in the GUI must be properly propagated to the TCL s
 Observe the TCL console when changing anyhthing in the GUI: this helps identifying
 settings that have changed.
 
-  1. Changing project parameters (device, synthesis or implementation strategies or other
+  1. Changes to project parameters (device, synthesis or implementation strategies or other
      settings) are merged into `generateProject.tcl`.
   2. Modifying IP settings are merged into the IP-generating TCL script(s). A special
      case is the AXI Crossbar which can be created from the expert python script along
