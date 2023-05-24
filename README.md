@@ -72,3 +72,31 @@ directories and files:
       code and generics are listed in `sources_mrf_evm_dc.tcl`
     - `generateProject.tcl` creates the actual project and executes all the other
       TCL scripts to populate it.
+  - `xdc/` contains constraints
+  - `modules/` contains git submodules of various components; most notably, the
+    MRF code is present here.
+  - `py/` contain python helper scripts that can be used to generate VHDL code
+    (AXI port declarations and mappings). Expert use only.
+
+### EVM Notes
+
+Some top-level files of the EVM module are unused
+
+ - `CPSI_CIO_top.vhd` is unused; the top-level entity is now part of the project.
+
+Note also that `mrf-evm-dc` uses its own git submodules - albeit not for the CPSI_CIO
+variant. These submodules are not part of this project and are unused but be aware that
+`git submodule` operations with the `--recursive` flag may fail.
+
+## Generating the Project
+
+After cloning the git repository and initializing/populating the git submodules
+the project can be generated from TCL. I like to do that from a `vivado` working-
+directory:
+
+  1. `mkdir vivado; chdir vivado`
+  2. start vivado in GUI mode
+  3. in the TCL console enter `source ../tcl/generateProject.tcl`
+  4. wait for the GUI to update
+  5. proceed to synthesis/implementation etc.
+  
