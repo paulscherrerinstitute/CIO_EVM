@@ -564,12 +564,12 @@ begin
       axi_sm                   => maxi_sm( EVM_IDX_C )
     );
 
-  i_axi_ila : entity work.AxiIla
-    port map (
-      clk                      => axiClk,
-      axim                     => maxi_ms( EVM_IDX_C ),
-      axis                     => maxi_sm( EVM_IDX_C )
-    );
+--  i_axi_ila : entity work.AxiIla
+--    port map (
+--      clk                      => axiClk,
+--      axim                     => maxi_ms( EVM_IDX_C ),
+--      axis                     => maxi_sm( EVM_IDX_C )
+--    );
 
   FP_LEMO_EN_0         <= '1';
   FP_LEMO_EN_1         <= '1';
