@@ -98,38 +98,38 @@ class AxiPort(PropBase):
     "aw.len"   : [ True, 7   ],
     "aw.size"  : [ True, 2   ],
     "aw.burst" : [ True, 1   ],
-    "aw.lock"  : [ True, 0   ],
+    "aw.lock"  : [ True,-1   ],
     "aw.cache" : [ True, 3   ],
     "aw.prot"  : [ True, 2   ],
     "aw.qos"   : [ True, 3   ],
     "aw.user"  : [ True, 0   ],
-    "aw.valid" : [ True, 0   ],
-    "aw.ready" : [ False, 0  ],
+    "aw.valid" : [ True, -1  ],
+    "aw.ready" : [ False,-1  ],
     "w.data"   : [ True, 31  ],
     "w.strb"   : [ True, 3   ],
-    "w.last"   : [ True, 0   ],
-    "w.valid"  : [ True, 0   ],
-    "w.ready"  : [ False, 0  ],
+    "w.last"   : [ True,-1   ],
+    "w.valid"  : [ True, -1  ],
+    "w.ready"  : [ False,-1  ],
     "b.resp"   : [ False, 1  ],
-    "b.valid"  : [ False, 0  ],
-    "b.ready"  : [ True, 0   ],
+    "b.valid"  : [ False,-1  ],
+    "b.ready"  : [ True,-1   ],
     "ar.addr"  : [ True, 31  ],
     "ar.id"    : [ True, 0   ],
     "ar.len"   : [ True, 7   ],
     "ar.size"  : [ True, 2   ],
     "ar.burst" : [ True, 1   ],
-    "ar.lock"  : [ True, 0   ],
+    "ar.lock"  : [ True,-1   ],
     "ar.cache" : [ True, 3   ],
     "ar.prot"  : [ True, 2   ],
     "ar.qos"   : [ True, 3   ],
     "ar.user"  : [ True, 0   ],
-    "ar.valid" : [ True, 0   ],
-    "ar.ready" : [ False, 0  ],
+    "ar.valid" : [ True,-1   ],
+    "ar.ready" : [ False,-1  ],
     "r.data"   : [ False, 31 ],
     "r.resp"   : [ False, 1  ],
-    "r.last"   : [ False, 0  ],
-    "r.valid"  : [ False, 0  ],
-    "r.ready"  : [ True, 0   ]
+    "r.last"   : [ False,-1  ],
+    "r.valid"  : [ False,-1  ],
+    "r.ready"  : [ True,-1   ]
   }
 
   _AXIL_FILTER_KEYS = [
@@ -228,6 +228,8 @@ class AxiPortDecl(AxiPort):
     end = ";"
     if ( isLast and self.isLastPort() ):
       end = ""
+    if width == 0:
+      width = 1
     self.p( f.format( self.prefix() + port + sname, io, width * self.nPortsInVect() - 1, end, W=self.fieldWidth() ) )
 
 class AxiSignalDecl(AxiPortDecl):
@@ -242,6 +244,8 @@ class AxiSignalDecl(AxiPortDecl):
     self.p( "signal ", end="" )
     orig = self.indent()
     self.indent( 0 )
+    if width == 0:
+      width = 1
     super().__call__(port, sname, m2s, width * self.numPorts(), isLast, arg)
     self.indent( orig )
 
@@ -294,6 +298,8 @@ class AxiPortMap(AxiPort):
     self.recPrefix  ( recPrefix )
 
   def __call__(self, port, sname, m2s, width, isLast, arg):
+    if ( width == 0 ):
+      width = 1
     if ( self.numPorts() == 1 ):
       fidx =''
     else:
@@ -534,4 +540,46 @@ class AxiSubMap(AxiPortMap):
       self.file(fo)
 
     
+class AxiIlaMap(AxiPort):
+
+  props = {
+    "ilaPrefix"       : "probe0",        # prefix of the ILA port
+    "recPrefix"       : "axi",            # prefix of the records
+    "pruneAddr"       : None,            # optional: positive number limiting with of address mapping
+    "fieldWidth"      : 40               # field width (pretty printing) of LHS
+  }
+
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+    self._i = 0
+
+  def map(self, f=None, arg=None):
+    self._i = 0
+    super().map(f, arg)
+
+  def __call__(self, port, sname, m2s, width, isLast, arg):
+    isVect = (width != 0)
+    if ( not isVect ):
+      width = 1
+    e = self._i + width
+    trng = ""
+    if ( ( not self.pruneAddr() is None ) and ( sname == "addr" ) ):
+      width = self.pruneAddr()
+      trng = "({:d} downto 0)".format( width - 1 )
+
+    if ( isVect ):
+      p = self.ilaPrefix() + "({:d} downto {:d})".format( e - 1, self._i )
+    else:
+      p = self.ilaPrefix() + "({:d})".format( self._i )
+    end = ","
+    if ( isLast ):
+      end = ""
+
+    if ( m2s ):
+      dir = "m"
+    else:
+      dir = "s"
     
+    f = "{:{W}} => {}{}.{}.{}" + trng + end
+    self.p( f.format( p, self.recPrefix(), dir, self.toRecField(port), sname, W=self.fieldWidth() ) )
+    self._i = e
