@@ -167,6 +167,12 @@ architecture STRUCTURE of cpsi_cio_top is
   signal axi_ms_araddr_hi                      : std_logic_vector(39 downto 32);
   signal axi_ms_awaddr_hi                      : std_logic_vector(39 downto 32);
 
+  signal CLK_A_GTH_MSH_SFP1                    : std_logic;
+  signal CLK_A_GTH_QSFP0                       : std_logic;
+  signal CLK_B_GTH_MSH                         : std_logic;
+  signal CLK_B_GTH_QSFP0                       : std_logic;
+  signal CLK_B_GTH_QSFP1                       : std_logic;
+
 begin
 
   irq <= (others => '0');
@@ -214,6 +220,15 @@ begin
       axi_sm                            => maxi_sm(FW_ID_IDX_C)
     );
 
+  -- assign the same way it was done in the original BD
+  clocks(2 downto 0)                    <= (others => '0');
+  clocks(3)                             <= CLK_A_GTH_MSH_SFP1;
+  clocks(4)                             <= CLK_A_GTH_QSFP0;
+  clocks(5)                             <= CLK_B_GTH_MSH;
+  clocks(6)                             <= CLK_B_GTH_QSFP0;
+  clocks(7)                             <= CLK_B_GTH_QSFP1;
+  clocks(8)                             <= '0';
+
   i_clk_meas_wrp : entity work.ClkMeasureWrapper
     generic map (
       NumOfClocks_g                     => clocks'length,
@@ -232,8 +247,8 @@ begin
 
   i_tim320_wrp : entity work.Tim320TriggerWrapper
     generic map (
-      C_S00_AXI_ADDR_WIDTH => 14,
-      C_NUM_TRIGGERS       => trigInp'length
+      C_S00_AXI_ADDR_WIDTH              => 14,
+      C_NUM_TRIGGERS                    => trigInp'length
     )
     port map (
       i_delay_clk                       => delayClk,
@@ -254,15 +269,10 @@ begin
   signal CLK_B_GTH_QSFP0_GT                    : std_logic;
   signal CLK_B_GTH_QSFP1_GT                    : std_logic;
 
-  signal CLK_A_GTH_MSH_SFP1                    : std_logic;
   signal CLK_A_GTH_MSH_SFP1_ODIV2              : std_logic;
-  signal CLK_A_GTH_QSFP0                       : std_logic;
   signal CLK_A_GTH_QSFP0_ODIV2                 : std_logic;
-  signal CLK_B_GTH_QSFP0                       : std_logic;
   signal CLK_B_GTH_QSFP0_ODIV2                 : std_logic;
-  signal CLK_B_GTH_QSFP1                       : std_logic;
   signal CLK_B_GTH_QSFP1_ODIV2                 : std_logic;
-  signal CLK_B_GTH_MSH                         : std_logic;
   signal CLK_B_GTH_MSH_ODIV2                   : std_logic;
 
   signal slv_fanout_mgt_qsfp0_rx_p             : std_logic_vector(3 downto 0);
@@ -552,6 +562,13 @@ begin
       axi_aresetn              => axiRstb,
       axi_ms                   => maxi_ms( EVM_IDX_C ),
       axi_sm                   => maxi_sm( EVM_IDX_C )
+    );
+
+  i_axi_ila : entity work.AxiIla
+    port map (
+      clk                      => axiClk,
+      axim                     => maxi_ms( EVM_IDX_C ),
+      axis                     => maxi_sm( EVM_IDX_C )
     );
 
   FP_LEMO_EN_0         <= '1';
