@@ -23,15 +23,15 @@ entity cpsi_cio_top is
    G_ID_PROJECT          : string                         := "EVM"
    );
  port (
-    CLK_A_GTH_MSH_SFP1_N : in STD_LOGIC;
+    CLK_A_GTH_MSH_SFP1_N : in STD_LOGIC;   -- Q229, refclk0, from CLKA OUT9
     CLK_A_GTH_MSH_SFP1_P : in STD_LOGIC;
-    CLK_A_GTH_QSFP0_N : in STD_LOGIC;
+    CLK_A_GTH_QSFP0_N : in STD_LOGIC;      -- Q128, refclk0, from CLKA OUT8
     CLK_A_GTH_QSFP0_P : in STD_LOGIC;
-    CLK_B_GTH_MSH_N : in STD_LOGIC;
+    CLK_B_GTH_MSH_N : in STD_LOGIC;        -- Q230, refclk0, from CLKB OUT7
     CLK_B_GTH_MSH_P : in STD_LOGIC;
-    CLK_B_GTH_QSFP0_N : in STD_LOGIC;
+    CLK_B_GTH_QSFP0_N : in STD_LOGIC;      -- Q128, refclk1, from CLKB OUT8
     CLK_B_GTH_QSFP0_P : in STD_LOGIC;
-    CLK_B_GTH_QSFP1_N : in STD_LOGIC;
+    CLK_B_GTH_QSFP1_N : in STD_LOGIC;      -- Q228, refclk0, from CLKB OUT9
     CLK_B_GTH_QSFP1_P : in STD_LOGIC;
     CLK_A_GTH_MSH_SFP1_OUT_N : out STD_LOGIC;
     CLK_A_GTH_MSH_SFP1_OUT_P : out STD_LOGIC;
@@ -173,9 +173,13 @@ architecture STRUCTURE of cpsi_cio_top is
   signal CLK_B_GTH_QSFP0                       : std_logic;
   signal CLK_B_GTH_QSFP1                       : std_logic;
 
+  signal irq_evru                              : std_logic := '0';
+  signal irq_evrd                              : std_logic := '0';
+  signal irq_evg                               : std_logic := '0';
+
 begin
 
-  irq <= (others => '0');
+  irq <= ( 0 => irq_evg, 1 => irq_evru, 2 => irq_evrd, others => '0');
 
   i_ps_wrp: entity work.ZynqMpPSWrapper
     port map (
@@ -561,7 +565,11 @@ begin
       axi_aclk                 => axiClk,
       axi_aresetn              => axiRstb,
       axi_ms                   => maxi_ms( EVM_IDX_C ),
-      axi_sm                   => maxi_sm( EVM_IDX_C )
+      axi_sm                   => maxi_sm( EVM_IDX_C ),
+
+      irq_evg                  => irq_evg,
+      irq_evrd                 => irq_evrd,
+      irq_evru                 => irq_evru
     );
 
 --  i_axi_ila : entity work.AxiIla

@@ -52,7 +52,11 @@ entity EvmWrapper is
     axi_aclk                 : in  std_logic;
     axi_aresetn              : in  std_logic;
     axi_ms                   : in  rec_axi_ms;
-    axi_sm                   : out rec_axi_sm
+    axi_sm                   : out rec_axi_sm;
+
+    irq_evg                  : out std_logic;
+    irq_evru                 : out std_logic;
+    irq_evrd                 : out std_logic
   );
 end entity EvmWrapper;
 
@@ -161,6 +165,10 @@ begin
       s00_axi_rresp               => axi_sm.dr.resp,
       s00_axi_rlast               => axi_sm.dr.last,
       s00_axi_rvalid              => axi_sm.dr.valid,
-      s00_axi_rready              => axi_ms.dr.ready
+      s00_axi_rready              => axi_ms.dr.ready,
+
+      IRQ_EVG                     => irq_evg,
+      IRQ_EVRD                    => irq_evrd,
+      IRQ_EVRU                    => irq_evru
     );
 end architecture Mapping;
