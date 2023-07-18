@@ -179,7 +179,7 @@ architecture STRUCTURE of cpsi_cio_top is
 
 begin
 
-  irq <= ( 0 => irq_evg, 1 => irq_evru, 2 => irq_evrd, others => '0');
+  irq <= ( 0 => irq_evg, 1 => irq_evrd, 2 => irq_evru, others => '0');
 
   i_ps_wrp: entity work.ZynqMpPSWrapper
     port map (
