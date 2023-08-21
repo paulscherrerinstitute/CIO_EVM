@@ -65,4 +65,3 @@ set files [list \
 ]
 
 add_files -norecurse -fileset [get_filesets constrs_1] $files
-set_property USED_IN_SYNTHESIS 0 [get_files ${files}]
