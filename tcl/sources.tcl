@@ -24,8 +24,12 @@ add_files -norecurse -fileset [get_filesets sources_1] $files
 
 set files [list \
   [file normalize "$origin_dir/../xdc/pinout.xdc"] \
+  [file normalize "$origin_dir/../xdc/clock_measure.xdc"] \
 ]
 
 add_files -norecurse -fileset [get_filesets constrs_1] $files
+
+set_property SCOPED_TO_REF single_clock_measurement [get_files "*/xdc/clock_measure.xdc"]
+
 
 source "$origin_dir/sources_mrf_evm_dc.tcl"
