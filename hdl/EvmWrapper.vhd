@@ -17,6 +17,9 @@ entity EvmWrapper is
     CLK_B_GTH_QSFP0_GT     : in std_logic;
     CLK_B_GTH_MSH_GT       : in std_logic;
 
+    CLK_A_FPGA_DP_GC       : in std_logic;
+    CLK_B_FPGA_DP_GC       : in std_logic;
+
     CLK_A_LOL_N            : in std_logic;
     CLK_B_LOL_N            : in std_logic;
 
@@ -41,6 +44,8 @@ entity EvmWrapper is
     o_fanout_mgt_p6_432_tx_n : out STD_LOGIC_VECTOR ( 3 downto 0 );
 
     CLKSYN                   : out std_logic;
+    CLKSYN_CLK_O             : out std_logic;
+    RECCLK_O                 : out std_logic;
 
     LED_SDT                  : out std_logic;
     LED_SCK                  : out std_logic;
@@ -98,6 +103,9 @@ begin
       CLK_B_GTH_QSFP0_GT          => CLK_B_GTH_QSFP0_GT,
       CLK_B_GTH_MSH_GT            => CLK_B_GTH_MSH_GT,
 
+      CLK_A_FPGA_DP_GC            => CLK_A_FPGA_DP_GC,
+      CLK_B_FPGA_DP_GC            => CLK_B_FPGA_DP_GC,
+
       CLK_A_LOL_N                 => CLK_A_LOL_N,
       CLK_B_LOL_N                 => CLK_B_LOL_N,
 
@@ -122,6 +130,8 @@ begin
       o_fanout_mgt_p6_432_tx_n    => o_fanout_mgt_p6_432_tx_n,
 
       CLKSYN                      => CLKSYN,
+      CLKSYN_CLK_O                => CLKSYN_CLK_O,
+      RECCLK_O                    => RECCLK_O,
 
       LED_SDT                     => LED_SDT,
       LED_SCK                     => LED_SCK,

@@ -33,11 +33,11 @@ set_property IOSTANDARD LVCMOS33 [get_ports {FP_LEMO_*}]
 # set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets buf_s5_clk/O]
 # set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets buf_s7_clk/O]
 # 
-# set_property PACKAGE_PIN AB5   [get_ports {CLK_A_FPGA_DP_GC_N}];
-# set_property PACKAGE_PIN AB6   [get_ports {CLK_A_FPGA_DP_GC_P}];
+set_property PACKAGE_PIN AB5   [get_ports {CLK_A_FPGA_DP_GC_N}];
+set_property PACKAGE_PIN AB6   [get_ports {CLK_A_FPGA_DP_GC_P}];
 set_property PACKAGE_PIN AA2   [get_ports {CLK_A_FPGA_DP_OUT_N}];
 set_property PACKAGE_PIN AA3   [get_ports {CLK_A_FPGA_DP_OUT_P}];
-set_property IOSTANDARD LVDS [get_ports CLK_A_FPGA_DP_OUT_*]
+set_property IOSTANDARD LVDS [get_ports CLK_A_FPGA_DP_*]
 
 #set_property PACKAGE_PIN E7   [get_ports {CLK_A_GTH_MSH_OUT_N}];
 #set_property PACKAGE_PIN E8   [get_ports {CLK_A_GTH_MSH_OUT_P}];
@@ -47,10 +47,11 @@ set_property PACKAGE_PIN J7   [get_ports {CLK_A_GTH_MSH_SFP1_OUT_N}];
 set_property PACKAGE_PIN J8   [get_ports {CLK_A_GTH_MSH_SFP1_OUT_P}];
 set_property PACKAGE_PIN F26   [get_ports {CLK_A_GTH_QSFP0_N}];
 set_property PACKAGE_PIN F25   [get_ports {CLK_A_GTH_QSFP0_P}];
-# set_property PACKAGE_PIN AD6   [get_ports {CLK_B_FPGA_DP_GC_N}];
-# set_property PACKAGE_PIN AC6   [get_ports {CLK_B_FPGA_DP_GC_P}];
+set_property PACKAGE_PIN AD6   [get_ports {CLK_B_FPGA_DP_GC_N}];
+set_property PACKAGE_PIN AC6   [get_ports {CLK_B_FPGA_DP_GC_P}];
 # set_property PACKAGE_PIN U1   [get_ports {CLK_B_FPGA_DP_OUT_N}];
 # set_property PACKAGE_PIN T1   [get_ports {CLK_B_FPGA_DP_OUT_P}];
+set_property IOSTANDARD LVDS [get_ports CLK_B_FPGA_DP_*]
 set_property PACKAGE_PIN G7   [get_ports {CLK_B_GTH_MSH_N}];
 set_property PACKAGE_PIN G8   [get_ports {CLK_B_GTH_MSH_P}];
 set_property PACKAGE_PIN D26   [get_ports {CLK_B_GTH_QSFP0_N}];

@@ -41,6 +41,10 @@ entity cpsi_cio_top is
     L1_GBT_MSH_SFP_TX_P : out  STD_LOGIC;
     CLK_A_FPGA_DP_OUT_P : out STD_LOGIC;
     CLK_A_FPGA_DP_OUT_N : out STD_LOGIC;
+    CLK_A_FPGA_DP_GC_P  : in  STD_LOGIC;
+    CLK_A_FPGA_DP_GC_N  : in  STD_LOGIC;
+    CLK_B_FPGA_DP_GC_P  : in  STD_LOGIC;
+    CLK_B_FPGA_DP_GC_N  : in  STD_LOGIC;
     CLK_A_LOL_N         : in STD_LOGIC;
     CLK_B_LOL_N         : in STD_LOGIC;
     FP_LEMO_IN_0        : in  STD_LOGIC;
@@ -177,6 +181,8 @@ architecture STRUCTURE of cpsi_cio_top is
   signal irq_evrd                              : std_logic := '0';
   signal irq_evg                               : std_logic := '0';
 
+  signal CLKSYN_CLK                            : std_logic;
+  signal RX_REC_CLK                            : std_logic;
 begin
 
   irq <= ( 0 => irq_evg, 1 => irq_evrd, 2 => irq_evru, others => '0');
@@ -225,7 +231,9 @@ begin
     );
 
   -- assign the same way it was done in the original BD
-  clocks(2 downto 0)                    <= (others => '0');
+  clocks(0 downto 0)                    <= (others => '0');
+  clocks(1)                             <= RX_REC_CLK;
+  clocks(2)                             <= CLKSYN_CLK;
   clocks(3)                             <= CLK_A_GTH_MSH_SFP1;
   clocks(4)                             <= CLK_A_GTH_QSFP0;
   clocks(5)                             <= CLK_B_GTH_MSH;
@@ -278,6 +286,11 @@ begin
   signal CLK_B_GTH_QSFP0_ODIV2                 : std_logic;
   signal CLK_B_GTH_QSFP1_ODIV2                 : std_logic;
   signal CLK_B_GTH_MSH_ODIV2                   : std_logic;
+
+  signal CLK_A_FPGA_DP_GC_NB                   : std_logic;
+  signal CLK_A_FPGA_DP_GC                      : std_logic;
+  signal CLK_B_FPGA_DP_GC_NB                   : std_logic;
+  signal CLK_B_FPGA_DP_GC                      : std_logic;
 
   signal slv_fanout_mgt_qsfp0_rx_p             : std_logic_vector(3 downto 0);
   signal slv_fanout_mgt_qsfp0_rx_n             : std_logic_vector(3 downto 0);
@@ -363,6 +376,21 @@ begin
       ODIV2                             => CLK_B_GTH_MSH_ODIV2
     );
 
+  i_ibufds_5   : component IBUFDS
+    port map (
+      I                                 => CLK_A_FPGA_DP_GC_P,
+      IB                                => CLK_A_FPGA_DP_GC_N,
+      O                                 => CLK_A_FPGA_DP_GC_NB
+    );
+
+  i_ibufds_6   : component IBUFDS
+    port map (
+      I                                 => CLK_B_FPGA_DP_GC_P,
+      IB                                => CLK_B_FPGA_DP_GC_N,
+      O                                 => CLK_B_FPGA_DP_GC_NB
+    );
+
+
   i_bufg_0     : component BUFG_GT
     port map (
       I                                 => CLK_A_GTH_MSH_SFP1_ODIV2,
@@ -416,6 +444,18 @@ begin
       CLR                               => '0',
       CLRMASK                           => '0',
       DIV                               => "000"
+    );
+
+  i_bufg_5     : component BUFG
+    port map (
+      I                                 => CLK_A_FPGA_DP_GC_NB,
+      O                                 => CLK_A_FPGA_DP_GC
+    );
+
+  i_bufg_6     : component BUFG
+    port map (
+      I                                 => CLK_B_FPGA_DP_GC_NB,
+      O                                 => CLK_B_FPGA_DP_GC
     );
 
   i_obufds_syn : component OBUFDS
@@ -522,6 +562,9 @@ begin
       CLK_B_GTH_QSFP0_GT        => CLK_B_GTH_QSFP0_GT,
       CLK_B_GTH_MSH_GT          => CLK_B_GTH_MSH_GT,
 
+      CLK_A_FPGA_DP_GC          => CLK_A_FPGA_DP_GC,
+      CLK_B_FPGA_DP_GC          => CLK_B_FPGA_DP_GC,
+
       CLK_A_LOL_N               => CLK_A_LOL_N,
       CLK_B_LOL_N               => CLK_B_LOL_N,
 
@@ -547,6 +590,8 @@ begin
       o_fanout_mgt_p6_432_tx_n  => slv_fanout_mgt_p6_4321_tx_n,
 
       CLKSYN                    => CLKSYN,
+      CLKSYN_CLK_O              => CLKSYN_CLK,
+      RECCLK_O                  => RX_REC_CLK,
 
       LED_SDT                   => ME_FPI_LED_SDTI,
       LED_SCK                   => ME_FPI_LED_SCKI,

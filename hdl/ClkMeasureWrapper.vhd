@@ -51,7 +51,8 @@ begin
     generic map (
       NumOfClocks_g                => NumOfClocks_g,
       AxiClkFreq_g                 => AxiClkFreq_g,
-      MaxClkFreq_g                 => MaxClkFreq_g
+      MaxClkFreq_g                 => MaxClkFreq_g,
+      C_S00_AXI_ID_WIDTH           => C_S_AXI_ID_WIDTH
     )
     port map (
       Clocks                       => Clocks,
