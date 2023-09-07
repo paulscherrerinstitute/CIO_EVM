@@ -24,6 +24,7 @@ add_files -norecurse -fileset [get_filesets sources_1] $files
 
 set files [list \
   [file normalize "$origin_dir/../xdc/pinout.xdc"] \
+  [file normalize "$origin_dir/../xdc/cpsi_cio_clocking.xdc"] \
   [file normalize "$origin_dir/../xdc/clock_measure.xdc"] \
 ]
 

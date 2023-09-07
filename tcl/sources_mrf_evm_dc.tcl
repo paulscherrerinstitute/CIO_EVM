@@ -61,7 +61,14 @@ set files [list \
 add_files -norecurse -fileset [get_filesets sources_1] $files
 
 set files [list \
-[file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/cpsi_cio.xdc"]
+ [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/false_paths.xdc"] \
+ [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/false_paths_channel_gthe4.xdc"] \
+ [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/false_paths_dc_meas.xdc"] \
+ [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/false_paths_sync_domain.xdc"] \
 ]
 
 add_files -norecurse -fileset [get_filesets constrs_1] $files
+
+set_property SCOPED_TO_REF transceiver_channel_gthe4  [get_files "*/false_paths_channel_gthe4.xdc"]
+set_property SCOPED_TO_REF delay_measure              [get_files "*/false_paths_dc_meas.xdc"]
+set_property SCOPED_TO_REF sync_domain                [get_files "*/false_paths_sync_domain.xdc"]
