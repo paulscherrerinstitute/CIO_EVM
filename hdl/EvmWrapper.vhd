@@ -5,6 +5,9 @@ use ieee.std_logic_1164.all;
 use work.psi_common_axi_pkg.all;
 
 entity EvmWrapper is
+  generic (
+    C_CLKSYN_DIFFCLK_DIV2  : boolean
+  );
   port (
     CLK_A_GTH_MSH_SFP1     : in std_logic;
     CLK_B_GTH_QSFP1        : in std_logic;
@@ -89,7 +92,8 @@ begin
       C_S00_AXI_RUSER_WIDTH       => C_S_AXI_RUSER_WIDTH,
       C_S00_AXI_AWUSER_WIDTH      => C_S_AXI_AWUSER_WIDTH,
       C_S00_AXI_WUSER_WIDTH       => C_S_AXI_WUSER_WIDTH,
-      C_S00_AXI_BUSER_WIDTH       => C_S_AXI_BUSER_WIDTH
+      C_S00_AXI_BUSER_WIDTH       => C_S_AXI_BUSER_WIDTH,
+      C_DIFFCLK_DIV2              => C_CLKSYN_DIFFCLK_DIV2
     )
     port map (
       CLK_A_GTH_MSH_SFP1          => CLK_A_GTH_MSH_SFP1,

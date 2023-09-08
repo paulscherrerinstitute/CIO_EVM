@@ -152,6 +152,13 @@ architecture STRUCTURE of cpsi_cio_top is
   constant N_CLK_MEAS_C                        : natural := 9;
   constant N_TRIGS_C                           : natural := 2;
 
+  -- whether the EVM should divide the recovered clock by 2 in
+  -- 'downsampled' fanout mode. We say no because we want the Si5395_A
+  -- to always lock to the master at full rate. We then use the Si5395_A
+  -- to generate the downsampled fanout clocks (MGT refclocks and
+  -- parallel TX clock).
+  constant C_CLKSYN_DIFFCLK_DIV2               : boolean := false;
+
   signal axiClk                                : std_logic;
   signal axiRst                                : std_logic;
   signal axiRstb                               : std_logic;
@@ -550,7 +557,10 @@ begin
   L4_MSH_GBT_TX_N                       <=   slv_fanout_mgt_p6_4321_tx_n(3);
 
   i_evm_wrp : entity work.EvmWrapper
-    port map (
+    generic map (
+      C_CLKSYN_DIFFCLK_DIV2     => C_CLKSYN_DIFFCLK_DIV2
+    )
+    port map  (
       CLK_A_GTH_MSH_SFP1        => CLK_A_GTH_MSH_SFP1,
       CLK_B_GTH_QSFP1           => CLK_B_GTH_QSFP1,
       CLK_A_GTH_QSFP0           => CLK_A_GTH_QSFP0,
