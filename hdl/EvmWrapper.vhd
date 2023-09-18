@@ -3,6 +3,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 use work.psi_common_axi_pkg.all;
+use work.axi_opb_pkg.all;
 
 entity EvmWrapper is
   generic (
@@ -70,19 +71,10 @@ end entity EvmWrapper;
 
 architecture Mapping of EvmWrapper is
 
-  signal axi_wdata_int            : std_logic_vector(63 downto 0);
-  signal axi_wstrb_int            : std_logic_vector( 7 downto 0);
-  signal axi_rdata_int            : std_logic_vector(63 downto 0);
+  signal s00_axi_m2s        : rec_axi_m2s;
+  signal s00_axi_s2m        : rec_axi_s2m;
+
 begin
-
-  -- data width is hardcoded to 64 (despite generic) even though
-  -- internally only 32 bits are supported.
-  axi_wstrb_int( 7 downto  4)     <= (others => '0');
-  axi_wstrb_int( 3 downto  0)     <= axi_ms.dw.strb;
-  axi_wdata_int(63 downto 32)     <= (others => '0');
-  axi_wdata_int(31 downto  0)     <= axi_ms.dw.data;
-
-  axi_sm.dr.data                  <= axi_rdata_int(31 downto 0);
 
   i_evm : entity work.evm_cio
     generic map (
@@ -140,42 +132,55 @@ begin
 
       s00_axi_aclk                => axi_aclk,
       s00_axi_aresetn             => axi_aresetn,
-      s00_axi_awaddr              => axi_ms.aw.addr,
-      s00_axi_awid                => axi_ms.aw.id,
-      s00_axi_awlen               => axi_ms.aw.len,
-      s00_axi_awsize              => axi_ms.aw.size,
-      s00_axi_awburst             => axi_ms.aw.burst,
-      s00_axi_awlock              => axi_ms.aw.lock,
-      s00_axi_awcache             => axi_ms.aw.cache,
-      s00_axi_awprot              => axi_ms.aw.prot,
-      s00_axi_awvalid             => axi_ms.aw.valid,
-      s00_axi_awready             => axi_sm.aw.ready,
-      s00_axi_wdata               => axi_wdata_int,
-      s00_axi_wstrb               => axi_wstrb_int,
-      s00_axi_wlast               => axi_ms.dw.last,
-      s00_axi_wvalid              => axi_ms.dw.valid,
-      s00_axi_wready              => axi_sm.dw.ready,
-      s00_axi_bresp               => axi_sm.b.resp,
-      s00_axi_bvalid              => axi_sm.b.valid,
-      s00_axi_bready              => axi_ms.b.ready,
-      s00_axi_araddr              => axi_ms.ar.addr,
-      s00_axi_arid                => axi_ms.ar.id,
-      s00_axi_arlen               => axi_ms.ar.len,
-      s00_axi_arsize              => axi_ms.ar.size,
-      s00_axi_arburst             => axi_ms.ar.burst,
-      s00_axi_arlock              => axi_ms.ar.lock,
-      s00_axi_arcache             => axi_ms.ar.cache,
-      s00_axi_arprot              => axi_ms.ar.prot,
-      s00_axi_arvalid             => axi_ms.ar.valid,
-      s00_axi_arready             => axi_sm.ar.ready,
-      s00_axi_rdata               => axi_rdata_int,
-      s00_axi_rresp               => axi_sm.dr.resp,
-      s00_axi_rlast               => axi_sm.dr.last,
-      s00_axi_rvalid              => axi_sm.dr.valid,
-      s00_axi_rready              => axi_ms.dr.ready,
+
+      s00_axi_m2s                 => s00_axi_m2s,
+      s00_axi_s2m                 => s00_axi_s2m,
 
       IRQ_EVG                     => irq_evg,
       IRQ_EVRD                    => irq_evrd,
       IRQ_EVRU                    => irq_evru
     );
+
+  s00_axi_m2s.arid <= axi_ms.ar.id;
+  s00_axi_m2s.araddr <= axi_ms.ar.addr;
+  s00_axi_m2s.arlen <= axi_ms.ar.len;
+  s00_axi_m2s.arsize <= axi_ms.ar.size;
+  s00_axi_m2s.arburst <= axi_ms.ar.burst;
+  s00_axi_m2s.arlock <= axi_ms.ar.lock;
+  s00_axi_m2s.arcache <= axi_ms.ar.cache;
+  s00_axi_m2s.arprot <= axi_ms.ar.prot;
+  s00_axi_m2s.arvalid <= axi_ms.ar.valid;
+  s00_axi_m2s.rready <= axi_ms.dr.ready;
+  s00_axi_m2s.awid <= axi_ms.aw.id;
+  s00_axi_m2s.awaddr <= axi_ms.aw.addr;
+  s00_axi_m2s.awlen <= axi_ms.aw.len;
+  s00_axi_m2s.awsize <= axi_ms.aw.size;
+  s00_axi_m2s.awburst <= axi_ms.aw.burst;
+  s00_axi_m2s.awlock <= axi_ms.aw.lock;
+  s00_axi_m2s.awcache <= axi_ms.aw.cache;
+  s00_axi_m2s.awprot <= axi_ms.aw.prot;
+  s00_axi_m2s.awvalid <= axi_ms.aw.valid;
+  s00_axi_m2s.wdata <= axi_ms.dw.data;
+  s00_axi_m2s.wstrb <= axi_ms.dw.strb;
+  s00_axi_m2s.wlast <= axi_ms.dw.last;
+  s00_axi_m2s.wvalid <= axi_ms.dw.valid;
+  s00_axi_m2s.bready <= axi_ms.b.ready;
+
+  axi_sm.ar.ready <= s00_axi_s2m.arready;
+  axi_sm.dr.id <= s00_axi_s2m.rid;
+  axi_sm.dr.data <= s00_axi_s2m.rdata;
+  axi_sm.dr.resp <= s00_axi_s2m.rresp;
+  axi_sm.dr.last <= s00_axi_s2m.rlast;
+  axi_sm.dr.user <= (others => '0');
+  axi_sm.dr.valid <= s00_axi_s2m.rvalid;
+
+  axi_sm.aw.ready <= s00_axi_s2m.awready;
+  axi_sm.dw.ready <= s00_axi_s2m.wready;
+
+  axi_sm.b.id <= s00_axi_s2m.bid;
+  axi_sm.b.resp <= s00_axi_s2m.bresp;
+  axi_sm.b.user <= (others => '0');
+  axi_sm.b.valid <= s00_axi_s2m.bvalid;
+
+
 end architecture Mapping;
