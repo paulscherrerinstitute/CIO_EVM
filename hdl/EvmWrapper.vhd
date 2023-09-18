@@ -86,13 +86,6 @@ begin
 
   i_evm : entity work.evm_cio
     generic map (
-      C_S00_AXI_ID_WIDTH          => C_S_AXI_ID_WIDTH,
-      C_S00_AXI_ADDR_WIDTH        => C_S_AXI_ADDR_WIDTH,
-      C_S00_AXI_ARUSER_WIDTH      => C_S_AXI_ARUSER_WIDTH,
-      C_S00_AXI_RUSER_WIDTH       => C_S_AXI_RUSER_WIDTH,
-      C_S00_AXI_AWUSER_WIDTH      => C_S_AXI_AWUSER_WIDTH,
-      C_S00_AXI_WUSER_WIDTH       => C_S_AXI_WUSER_WIDTH,
-      C_S00_AXI_BUSER_WIDTH       => C_S_AXI_BUSER_WIDTH,
       C_DIFFCLK_DIV2              => C_CLKSYN_DIFFCLK_DIV2
     )
     port map (
