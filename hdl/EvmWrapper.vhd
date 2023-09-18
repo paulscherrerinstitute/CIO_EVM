@@ -74,6 +74,12 @@ architecture Mapping of EvmWrapper is
   signal s00_axi_m2s        : rec_axi_m2s;
   signal s00_axi_s2m        : rec_axi_s2m;
 
+  signal axi_ms_evg         : rec_axi_ms;
+  signal axi_sm_evg         : rec_axi_sm;
+
+  signal event_clk          : std_logic;
+  signal event_rstn         : std_logic := '1';
+
 begin
 
   i_evm : entity work.evm_cio
@@ -121,6 +127,7 @@ begin
       CLKSYN                      => CLKSYN,
       CLKSYN_CLK_O                => CLKSYN_CLK_O,
       RECCLK_O                    => RECCLK_O,
+      event_clk_o                 => event_clk,
 
       LED_SDT                     => LED_SDT,
       LED_SCK                     => LED_SCK,
@@ -130,8 +137,8 @@ begin
 
       TBIN                        => TBIN,
 
-      s00_axi_aclk                => axi_aclk,
-      s00_axi_aresetn             => axi_aresetn,
+      s00_axi_aclk                => event_clk,
+      s00_axi_aresetn             => event_rstn,
 
       s00_axi_m2s                 => s00_axi_m2s,
       s00_axi_s2m                 => s00_axi_s2m,
@@ -141,46 +148,59 @@ begin
       IRQ_EVRU                    => irq_evru
     );
 
-  s00_axi_m2s.arid <= axi_ms.ar.id;
-  s00_axi_m2s.araddr <= axi_ms.ar.addr;
-  s00_axi_m2s.arlen <= axi_ms.ar.len;
-  s00_axi_m2s.arsize <= axi_ms.ar.size;
-  s00_axi_m2s.arburst <= axi_ms.ar.burst;
-  s00_axi_m2s.arlock <= axi_ms.ar.lock;
-  s00_axi_m2s.arcache <= axi_ms.ar.cache;
-  s00_axi_m2s.arprot <= axi_ms.ar.prot;
-  s00_axi_m2s.arvalid <= axi_ms.ar.valid;
-  s00_axi_m2s.rready <= axi_ms.dr.ready;
-  s00_axi_m2s.awid <= axi_ms.aw.id;
-  s00_axi_m2s.awaddr <= axi_ms.aw.addr;
-  s00_axi_m2s.awlen <= axi_ms.aw.len;
-  s00_axi_m2s.awsize <= axi_ms.aw.size;
-  s00_axi_m2s.awburst <= axi_ms.aw.burst;
-  s00_axi_m2s.awlock <= axi_ms.aw.lock;
-  s00_axi_m2s.awcache <= axi_ms.aw.cache;
-  s00_axi_m2s.awprot <= axi_ms.aw.prot;
-  s00_axi_m2s.awvalid <= axi_ms.aw.valid;
-  s00_axi_m2s.wdata <= axi_ms.dw.data;
-  s00_axi_m2s.wstrb <= axi_ms.dw.strb;
-  s00_axi_m2s.wlast <= axi_ms.dw.last;
-  s00_axi_m2s.wvalid <= axi_ms.dw.valid;
-  s00_axi_m2s.bready <= axi_ms.b.ready;
+  i_clk_cvt_evg : entity work.Axi4ClkConverter
+    port map (
+      s_axi_aclk                  => axi_aclk,
+      s_axi_aresetn               => axi_aresetn,
+      s_axi_ms                    => axi_ms,
+      s_axi_sm                    => axi_sm,
 
-  axi_sm.ar.ready <= s00_axi_s2m.arready;
-  axi_sm.dr.id <= s00_axi_s2m.rid;
-  axi_sm.dr.data <= s00_axi_s2m.rdata;
-  axi_sm.dr.resp <= s00_axi_s2m.rresp;
-  axi_sm.dr.last <= s00_axi_s2m.rlast;
-  axi_sm.dr.user <= (others => '0');
-  axi_sm.dr.valid <= s00_axi_s2m.rvalid;
+      m_axi_aclk                  => event_clk,
+      m_axi_aresetn               => event_rstn,
+      m_axi_ms                    => axi_ms_evg,
+      m_axi_sm                    => axi_sm_evg
+    );
 
-  axi_sm.aw.ready <= s00_axi_s2m.awready;
-  axi_sm.dw.ready <= s00_axi_s2m.wready;
+  s00_axi_m2s.arid <= axi_ms_evg.ar.id;
+  s00_axi_m2s.araddr <= axi_ms_evg.ar.addr;
+  s00_axi_m2s.arlen <= axi_ms_evg.ar.len;
+  s00_axi_m2s.arsize <= axi_ms_evg.ar.size;
+  s00_axi_m2s.arburst <= axi_ms_evg.ar.burst;
+  s00_axi_m2s.arlock <= axi_ms_evg.ar.lock;
+  s00_axi_m2s.arcache <= axi_ms_evg.ar.cache;
+  s00_axi_m2s.arprot <= axi_ms_evg.ar.prot;
+  s00_axi_m2s.arvalid <= axi_ms_evg.ar.valid;
+  s00_axi_m2s.rready <= axi_ms_evg.dr.ready;
+  s00_axi_m2s.awid <= axi_ms_evg.aw.id;
+  s00_axi_m2s.awaddr <= axi_ms_evg.aw.addr;
+  s00_axi_m2s.awlen <= axi_ms_evg.aw.len;
+  s00_axi_m2s.awsize <= axi_ms_evg.aw.size;
+  s00_axi_m2s.awburst <= axi_ms_evg.aw.burst;
+  s00_axi_m2s.awlock <= axi_ms_evg.aw.lock;
+  s00_axi_m2s.awcache <= axi_ms_evg.aw.cache;
+  s00_axi_m2s.awprot <= axi_ms_evg.aw.prot;
+  s00_axi_m2s.awvalid <= axi_ms_evg.aw.valid;
+  s00_axi_m2s.wdata <= axi_ms_evg.dw.data;
+  s00_axi_m2s.wstrb <= axi_ms_evg.dw.strb;
+  s00_axi_m2s.wlast <= axi_ms_evg.dw.last;
+  s00_axi_m2s.wvalid <= axi_ms_evg.dw.valid;
+  s00_axi_m2s.bready <= axi_ms_evg.b.ready;
 
-  axi_sm.b.id <= s00_axi_s2m.bid;
-  axi_sm.b.resp <= s00_axi_s2m.bresp;
-  axi_sm.b.user <= (others => '0');
-  axi_sm.b.valid <= s00_axi_s2m.bvalid;
+  axi_sm_evg.ar.ready <= s00_axi_s2m.arready;
+  axi_sm_evg.dr.id <= s00_axi_s2m.rid;
+  axi_sm_evg.dr.data <= s00_axi_s2m.rdata;
+  axi_sm_evg.dr.resp <= s00_axi_s2m.rresp;
+  axi_sm_evg.dr.last <= s00_axi_s2m.rlast;
+  axi_sm_evg.dr.user <= (others => '0');
+  axi_sm_evg.dr.valid <= s00_axi_s2m.rvalid;
+
+  axi_sm_evg.aw.ready <= s00_axi_s2m.awready;
+  axi_sm_evg.dw.ready <= s00_axi_s2m.wready;
+
+  axi_sm_evg.b.id <= s00_axi_s2m.bid;
+  axi_sm_evg.b.resp <= s00_axi_s2m.bresp;
+  axi_sm_evg.b.user <= (others => '0');
+  axi_sm_evg.b.valid <= s00_axi_s2m.bvalid;
 
 
 end architecture Mapping;
