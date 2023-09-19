@@ -16,10 +16,12 @@ set files [list \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/ac_input.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/average.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/axi_to_opb_bridge.vhd"] \
+ [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/axi_to_opb_wrapper.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/buf_bsram.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/evg_pkg.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/cpsi_cio_pkg.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/timestamp_pkg.vhd"] \
+ [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/axi_opb_pkg.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/config_RAM.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/databuf_dc_insert.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/databuf_rx.vhd"] \

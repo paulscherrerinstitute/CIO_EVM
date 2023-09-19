@@ -1,5 +1,6 @@
 
 set files [list \
+  [file normalize "$origin_dir/../hdl/axi_opb_cfg_pkg.vhd"] \
   [file normalize "$origin_dir/../hdl/cpsi_cio_top.vhd"] \
   [file normalize "$origin_dir/../hdl/AxiFwVersionWrapper.vhd"] \
   [file normalize "$origin_dir/../hdl/AxiXBarWrapper.vhd"] \
