@@ -14,8 +14,12 @@ ports.append( AxiConn.MstPort( addr = 0xA0001000, width = 12 ) )
 ports.append( AxiConn.MstPort( addr = 0xA0002000, width = 12 ) )
 # Timing Delay
 ports.append( AxiConn.MstPort( addr = 0xA0008000, width = 14 ) )
-# EVM
-ports.append( AxiConn.MstPort( addr = 0xA8000000, width = 25 ) )
+# EVG/FCT
+ports.append( AxiConn.MstPort( addr = 0xA8000000, width = 17 ) )
+# EVRU
+ports.append( AxiConn.MstPort( addr = 0xA8020000, width = 16 ) )
+# EVRD
+ports.append( AxiConn.MstPort( addr = 0xA8030000, width = 16 ) )
 
 # configure the crossbar for an address width of 40
 # which matches a the zynqmp IP

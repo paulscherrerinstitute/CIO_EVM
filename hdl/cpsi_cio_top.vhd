@@ -142,12 +142,14 @@ end entity cpsi_cio_top;
 architecture STRUCTURE of cpsi_cio_top is
 
   -- defined by the TCL code that instantiates the AXI crossbar IP
-  constant N_MST_C                             : natural := 5;
+  constant N_MST_C                             : natural := 7;
   constant FW_ID_IDX_C                         : natural := 0;
   constant CLKMS_IDX_C                         : natural := 1;
   constant FLEMO_IDX_C                         : natural := 2;
   constant T_DLY_IDX_C                         : natural := 3;
   constant EVM_IDX_C                           : natural := 4;
+  constant EVRD_IDX_C                          : natural := 5;
+  constant EVRU_IDX_C                          : natural := 6;
 
   constant N_CLK_MEAS_C                        : natural := 9;
   constant N_TRIGS_C                           : natural := 2;
@@ -619,8 +621,8 @@ begin
 
       axi_aclk                 => axiClk,
       axi_aresetn              => axiRstb,
-      axi_ms                   => maxi_ms( EVM_IDX_C ),
-      axi_sm                   => maxi_sm( EVM_IDX_C ),
+      axi_ms                   => maxi_ms( EVRU_IDX_C downto EVM_IDX_C ),
+      axi_sm                   => maxi_sm( EVRU_IDX_C downto EVM_IDX_C ),
 
       irq_evg                  => irq_evg,
       irq_evrd                 => irq_evrd,
