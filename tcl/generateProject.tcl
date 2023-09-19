@@ -154,6 +154,7 @@ set obj [get_filesets utils_1]
 # Generate stuff
 source "$origin_dir/zynqmp_ps_ip.tcl"
 source "$origin_dir/AxiXBar.tcl"
+source "$origin_dir/Axi4ClkConverter.tcl"
 
 # Load Sources
 source "$origin_dir/sources.tcl"

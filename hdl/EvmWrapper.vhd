@@ -83,12 +83,14 @@ architecture Mapping of EvmWrapper is
   signal axi_arstn_evm      : std_logic_vector(axi_ms'range) := (others => '1');
 
   signal event_clk          : std_logic;
+  signal up_event_clk       : std_logic;
   signal event_rstn         : std_logic := '1';
+  signal up_event_rstn      : std_logic := '1';
 
 begin
 
-  axi_aclk_evm  <= ( others => event_clk  );
-  axi_arstn_evm <= ( others => event_rstn );
+  axi_aclk_evm  <= ( 0 => event_clk ,  1 => event_clk,  2 => up_event_clk  );
+  axi_arstn_evm <= ( 0 => event_rstn , 1 => event_rstn, 2 => up_event_rstn  );
 
   i_evm : entity work.evm_cio
     generic map (
@@ -136,6 +138,7 @@ begin
       CLKSYN_CLK_O                => CLKSYN_CLK_O,
       RECCLK_O                    => RECCLK_O,
       event_clk_o                 => event_clk,
+      up_event_clk_o              => up_event_clk,
 
       LED_SDT                     => LED_SDT,
       LED_SCK                     => LED_SCK,
@@ -153,6 +156,11 @@ begin
       evrd_axi_m2s                => s00_axi_m2s(1),
       evrd_axi_s2m                => s00_axi_s2m(1),
 
+      evru_axi_aclk               => up_event_clk,
+      evru_axi_aresetn            => up_event_rstn,
+      evru_axi_m2s                => s00_axi_m2s(2),
+      evru_axi_s2m                => s00_axi_s2m(2),
+
       IRQ_EVG                     => irq_evg,
       IRQ_EVRD                    => irq_evrd,
       IRQ_EVRU                    => irq_evru
@@ -160,7 +168,7 @@ begin
 
   G_CLOCK_CONV : for i in axi_ms'range generate
 
-    i_clk_cvt_evg : entity work.Axi4ClkConverter
+    i_clk_cvt_evg : entity work.Axi4ClkConverterWrapper
       port map (
         s_axi_aclk                  => axi_aclk,
         s_axi_aresetn               => axi_aresetn,

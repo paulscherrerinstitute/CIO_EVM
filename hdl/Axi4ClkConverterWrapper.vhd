@@ -3,7 +3,7 @@ use     ieee.std_logic_1164.all;
 
 use     work.psi_common_axi_pkg.all;
 
-entity Axi4ClkConverter is
+entity Axi4ClkConverterWrapper is
   port (
     s_axi_aclk        : in  std_logic;
     s_axi_aresetn     : in  std_logic;
@@ -15,9 +15,9 @@ entity Axi4ClkConverter is
     m_axi_ms          : out rec_axi_ms;
     m_axi_sm          : in  rec_axi_sm
   );
-end entity Axi4ClkConverter;
+end entity Axi4ClkConverterWrapper;
 
-architecture rtl of Axi4ClkConverter is
+architecture rtl of Axi4ClkConverterWrapper is
 
   component axi_clock_converter_0 is
     port (
