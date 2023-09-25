@@ -29,7 +29,3 @@ set_clock_groups -logically_exclusive -group [get_clocks -include_generated_cloc
 # NOTE: since the MMCM is downstream of the BUFGMUX above it is important that the generated clocks on the mux
 #       are defined *before* we constrain the MMCM input mux!
 set_clock_groups -logically_exclusive -group [get_clocks -include_generated_clocks -of_objects [get_pins -hier -regex {.*/i_evm/mmc_i/CLKOUT0}] -filter {SOURCE=~*CLKIN1}] -group [get_clocks -include_generated_clocks -of_objects [get_pins -hier -regex {.*/i_evm/mmc_i/CLKOUT0}] -filter {SOURCE=~*CLKIN2}]
-
-#  Unfortunately, CDC between AXI and the event clocks (down- and upstream) is not resolved; still thousands of endpoints affected.
-
-#set_clock_groups -async -group [get_clocks clk_pl_1] -group [get_clocks -of_objects [get_nets -hier -regex {.*/i_evm/(event_clk|up_txusrclk)}]]
