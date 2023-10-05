@@ -19,11 +19,13 @@ create_clock -period 7.000 -name {clk_b_fpga_dp_gc}    -add [get_ports {CLK_B_FP
 #set_case_analysis 1 [get_pins -hier {*i_gth/TXOUTCLKSEL[1]}]
 #set_case_analysis 0 [get_pins -hier {*i_gth/TXOUTCLKSEL[2]}]
 
-# BUFGMUX switching between master/fanout mode
+# BUFGMUX switching between master/fanout mode as well as selecting a 'stable' clock
 create_generated_clock -name event_clk_B      -source [get_pins -hier -regex {.*/i_evm/i_bufg1/I0}] -divide_by 1 [get_pins -hier -regex {.*/i_evm/i_bufg1/O}]
 create_generated_clock -name event_clk_A -master [get_clocks clk_a_fpga_dp_gc] -add -source [get_pins -hier -regex {.*/i_evm/i_bufg1/I1}] -divide_by 1 [get_pins -hier -regex {.*/i_evm/i_bufg1/O}]
+create_generated_clock -name stable_clk      -source [get_pins -hier -regex {.*/i_evm/i_bufg2/I1}] -divide_by 1 [get_pins -hier -regex {.*/i_evm/i_bufg2/O}]
+create_generated_clock -name up_stable_clk   -source [get_pins -hier -regex {.*/i_evm/i_bufg3/I1}] -divide_by 1 [get_pins -hier -regex {.*/i_evm/i_bufg3/O}]
 
-set_clock_groups -logically_exclusive -group [get_clocks -include_generated_clocks event_clk_B] -group [get_clocks -include_generated_clocks event_clk_A]
+set_clock_groups -logically_exclusive -group [get_clocks -include_generated_clocks event_clk_B] -group [get_clocks -include_generated_clocks event_clk_A] -group [get_clocks -include_generated_clocks stable_clk] [get_clocks -include_generated_clocks up_stable_clk]
 
 # two inputs into MMCM
 # NOTE: since the MMCM is downstream of the BUFGMUX above it is important that the generated clocks on the mux
