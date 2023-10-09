@@ -33,6 +33,7 @@ set files [list \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/default_settings_pkg.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/delay_adjust.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/delay_measure_wnd.vhd"] \
+ [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/tick_detector.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/event_analyser.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/event_fanout.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/event_map_ram_k7_e1.vhd"] \
@@ -67,6 +68,7 @@ set files [list \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/false_paths_channel_gthe4.xdc"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/false_paths_dc_meas.xdc"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/false_paths_sync_domain.xdc"] \
+ [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/false_paths_tick_detector.xdc"] \
 ]
 
 add_files -norecurse -fileset [get_filesets constrs_1] $files
@@ -74,3 +76,4 @@ add_files -norecurse -fileset [get_filesets constrs_1] $files
 set_property SCOPED_TO_REF transceiver_channel_gthe4  [get_files "*/false_paths_channel_gthe4.xdc"]
 set_property SCOPED_TO_REF delay_measure              [get_files "*/false_paths_dc_meas.xdc"]
 set_property SCOPED_TO_REF sync_domain                [get_files "*/false_paths_sync_domain.xdc"]
+set_property SCOPED_TO_REF tick_detector              [get_files "*/false_paths_tick_detector.xdc"]

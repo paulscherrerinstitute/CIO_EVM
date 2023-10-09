@@ -148,6 +148,7 @@ begin
 
       TBIN                        => TBIN,
 
+      sys_clk                     => axi_aclk,
       evg_axi_aclk                => event_clk,
       evg_axi_aresetn             => event_rstn,
 
