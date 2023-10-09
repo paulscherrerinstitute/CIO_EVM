@@ -33,6 +33,7 @@ set files [list \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/default_settings_pkg.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/delay_adjust.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/delay_measure_wnd.vhd"] \
+ [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/delay_test.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/tick_detector.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/event_analyser.vhd"] \
  [file normalize "${origin_dir}/../modules/mrf-evm-dc/vhdl/event_fanout.vhd"] \
