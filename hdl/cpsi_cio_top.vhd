@@ -190,6 +190,8 @@ architecture STRUCTURE of cpsi_cio_top is
 
   signal CLKSYN_CLK                            : std_logic;
   signal RX_REC_CLK                            : std_logic;
+  signal UP_EVT_CLK                            : std_logic;
+  signal EVT_CLK                               : std_logic;
 begin
 
   irq <= ( 0 => irq_evg, 1 => irq_evrd, 2 => irq_evru, others => '0');
@@ -238,7 +240,7 @@ begin
     );
 
   -- assign the same way it was done in the original BD
-  clocks(0 downto 0)                    <= (others => '0');
+  clocks(0)                             <= EVT_CLK;
   clocks(1)                             <= RX_REC_CLK;
   clocks(2)                             <= CLKSYN_CLK;
   clocks(3)                             <= CLK_A_GTH_MSH_SFP1;
@@ -246,7 +248,7 @@ begin
   clocks(5)                             <= CLK_B_GTH_MSH;
   clocks(6)                             <= CLK_B_GTH_QSFP0;
   clocks(7)                             <= CLK_B_GTH_QSFP1;
-  clocks(8)                             <= '0';
+  clocks(8)                             <= UP_EVT_CLK;
 
   i_clk_meas_wrp : entity work.ClkMeasureWrapper
     generic map (
@@ -602,6 +604,8 @@ begin
       CLKSYN                    => CLKSYN,
       CLKSYN_CLK_O              => CLKSYN_CLK,
       RECCLK_O                  => RX_REC_CLK,
+      EVTCLK_O                  => EVT_CLK,
+      UPEVTCLK_O                => UP_EVT_CLK,
 
       LED_SDT                   => ME_FPI_LED_SDTI,
       LED_SCK                   => ME_FPI_LED_SCKI,

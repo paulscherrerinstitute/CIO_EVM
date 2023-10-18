@@ -49,6 +49,8 @@ entity EvmWrapper is
     CLKSYN                   : out std_logic;
     CLKSYN_CLK_O             : out std_logic;
     RECCLK_O                 : out std_logic;
+    EVTCLK_O                 : out std_logic;
+    UPEVTCLK_O               : out std_logic;
 
     LED_SDT                  : out std_logic;
     LED_SCK                  : out std_logic;
@@ -136,6 +138,8 @@ begin
       CLKSYN                      => CLKSYN,
       CLKSYN_CLK_O                => CLKSYN_CLK_O,
       RECCLK_O                    => RECCLK_O,
+      EVTCLK_O                    => EVTCLK_O,
+      UPEVTCLK_O                  => UPEVTCLK_O,
 
       LED_SDT                     => LED_SDT,
       LED_SCK                     => LED_SCK,
