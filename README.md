@@ -1,5 +1,7 @@
 # CIO_EVM - Basic Project for Instantiating the MRF EVM on CPSI CIO
 
+     Till Straumann <till.straumann@psi.ch>, 2023.
+
 This project provides a reproducible platform where the EVM can be
 instantiated. The main goal is to enable an efficient git-based
 workflow for collaboration between PSI and MRF.
@@ -36,7 +38,7 @@ use a TCL-based instantiation method for generating IP.
 #### Maintaining IP Instantiations in git
 
 Instead of keeping the instantiated IP's `xci` file under version control
-(this as multiple problems as mentioned before) we use TCL scripts to
+(this has multiple problems as mentioned before) we use TCL scripts to
 instantiate and configure IP cores.
 
 An IP core may be added to the project using the GUI first. After configuring
@@ -109,7 +111,7 @@ directory:
 ## Modifications
 
 Modifications of the project in the GUI must be properly propagated to the TCL scripts.
-Observe the TCL console when changing anyhthing in the GUI: this helps identifying
+Observe the TCL console when changing anything in the GUI: this helps identifying
 settings that have changed.
 
   1. Changes to project parameters (device, synthesis or implementation strategies or other
@@ -119,6 +121,3 @@ settings that have changed.
      with the wrapper HDL.
   3. Changes to the set of source files or constraints are propagated into the `sources.tcl`
      (CIO environment; top-level etc.) or `sources_mrf_evm_dc.tcl` (EVM-proper) scripts.
-
-Note that the names of the top-level ports must not be changed since they are referred-
-to from the MRF-supplied constraints file.
