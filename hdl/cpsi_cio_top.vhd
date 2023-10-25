@@ -643,6 +643,7 @@ begin
   FP_LEMO_OUT_0        <= '0';
   FP_LEMO_OUT_1        <= '0';
 
+  -- Assumes CPSI_RTM_FIO
   RIO_12_P             <= '0'; -- L_DIR_0 Low B->A; input
   RIO_12_N             <= '0'; -- L_DIR_1 Low B->A; input
   RIO_13_P             <= '0'; -- L_DIR_2 Low B->A; input
