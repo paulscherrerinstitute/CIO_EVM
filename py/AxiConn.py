@@ -2,6 +2,54 @@
 # signals and records as defined in 'psi_common_axi_pkg'. These are far
 # easier to connect between blocks.
 
+# Till Straumann, PSI 2023.
+
+# The objects implemented in this file are summarized here (for more details
+# scroll down to the particular object's implementation):
+#
+#  - AxiPortDecl   : write entity/component port declarations for bundles
+#                    of flat axi signals.
+#  - AxiSignalDecl : write signal declarations, assignments or port maps
+#                    for bundles of flat axi signals.
+#  - AxiPortMap    : write assignents or port maps that connect
+#                    rec_axi_ms/rec_axi_sm to flat axi signal bundles.
+#  - AxiXbar       : create vivado TCL script to generate a AXI Crossbar IP
+#                    and a VHDL wrapper which connects the IP to the outside
+#                    using rec_axi_ms/rec_axi_sm.
+#  - AxiIlaMap     : connect a rec_axi_ms/rec_axi_sm pair to a vivado ILA probe
+#
+# Naming constraints: signals/ports of associated 'rec_axi_ms/rec_axi_sm' types must
+# use a common prefix and the '_ms' and '_sm' suffixes, respectively; e.g.,:
+#
+#    signal mySignal_ms : rec_axi_ms;
+#    signal mySignal_sm : rec_axi_sm;
+#
+# Common features: all classes derived from AxiPort share
+# the following features:
+#
+#    - set output file (defaults to stdout) to an open file (created with
+#      io.open()):
+#
+#          obj.file( myOutFile )
+#
+#    - set indentation, e.g., to 12
+#          
+#          obj.indent( 12 )
+#
+#      increase by 4; print a mapping and restore:
+#          old = obj.indent()
+#          obj.indent( old + 4 )
+#          obj.map()
+#          obj.indent( old )
+#
+# many subclasses for mappings or assignments etc. also support
+# 'fieldWidth' which is the width of the space where the LHS of a
+# mapping or assignment is printed. I.e., the location of the
+# operator ('=>' for port map, ':' for declaration etc.) is
+#
+#       indent + fieldWidth
+#
+
 import sys
 import io
 
@@ -67,29 +115,15 @@ class PropBase:
         return setget
     return sga(prop)
 
-class MstPort:
-  def __init__(self, addr, width=12):
-    if ( addr < 0 ):
-      raise RuntimeError("Address must be non-negative")
-    if ( width < 1 or width > 32 ):
-      raise RuntimeError("Width must be in 1..32")
-    if ( addr & ((1<<width) - 1) != 0 ):
-      raise RuntimeError("Misaligned Address")
-    self._addr  = addr
-    self._width = width
-
-  @property
-  def addr(self):
-    return self._addr
-
-  @property
-  def width(self):
-    return self._width
-
-  @property
-  def description(self):
-    return "0x{:08x}..0x{:08x}".format( self.addr, self.addr + (1 << self.width) - 1 )
-
+# Base class for Axi mappings. Collection of signals that make
+# up an AXI connection. The most important member function is
+#
+#   'map()' -> 'do something to the collection of AXI signals'
+#
+# The AxiPort class leaves it up to subclasses to define what
+# to actually do. This could be 'write signal declarations with
+# a given prefix', 'write a VHDL port map', 'write part of
+# a component declaration' etc.
 class AxiPort(PropBase):
 
   _SIGNALS = {
@@ -197,14 +231,45 @@ class AxiPort(PropBase):
   def __call__(self, port, sname, m2s, width, isLast, arg):
     raise RuntimeError("Must be implemented by subclass")
 
+# Subclass of AxiPort for writing VHDL entity or component
+# port declarations.
+# Assume you want to generate a component declaration for
+# a component that uses flat axi signals with a prefix of
+# e.g., 's00_' i.e., it has
+#
+#   s00_awaddr, s00_awid, s00_awready, s00_awvalid...
+#
+# you want to write a 'master' port declaration which should
+# look like:
+#
+#   s00_awaddr   : out std_logic_vector(31 downto 0);
+#   s00_awid     : out std_logic_vector( 0 downto 0);
+#   s00_awvalid  : out std_logic;
+#   s00_awready  : in  std_logic;
+#   .. etc. ...
+#
+# Use
+#   portDecl = AxiPortDecl( prefix = 's00_', isMst = True ) 
+#   portDecl.map()
+#
+
 class AxiPortDecl(AxiPort):
 
   props = {
+    # width (pretty-printing) (w/o indentation) up to ':'
     "fieldWidth"     : 40,
+    # Axi XBar maps multiple n AXI ports into giant vectors
     "nPortsInVect"   : 1,
+    # when True omits trailing ';' on the last line
     "isLastPort"     : False,
+    # direction: True : master signals are OUT, subordinate signals are IN
+    #            False: master signals are IN , subordinate signals are OUT
     "isMst"          : True,
-    "prefix"         : ""
+    # port name prefix
+    "prefix"         : "",
+    # whether even scalar signals (such as valid/ready) should be
+    # declared as std_logic_vector(0 downto 0)
+    "scalarAsVect"   : False
   }
 
   def __init__(self, prefix, isMst, **kwargs):
@@ -218,7 +283,13 @@ class AxiPortDecl(AxiPort):
       iofmt = "{:s}"
     else:
       iofmt = "{:4s}"
-    f = "{:{W}}: " + iofmt + "std_logic_vector( {:d} downto 0 ){}"
+    if 1 == self.nPortsInVect() and not self.scalarAsVect() and 0 == width:
+      slvfmt = "std_logic"
+    else:
+      if width == 0:
+        width = 1
+      slvfmt = "std_logic_vector( {:d} downto 0 )".format( width * self.nPortsInVect() - 1 )
+    f = "{:{W}}: " + iofmt + slvfmt + "{}"
     if ( isMst is None ):
       io = ""
     elif ( m2s == isMst ):
@@ -228,9 +299,32 @@ class AxiPortDecl(AxiPort):
     end = ";"
     if ( isLast and self.isLastPort() ):
       end = ""
-    if width == 0:
-      width = 1
-    self.p( f.format( self.prefix() + port + sname, io, width * self.nPortsInVect() - 1, end, W=self.fieldWidth() ) )
+    self.p( f.format( self.prefix() + port + sname, io, end, W=self.fieldWidth() ) )
+
+# Subclass of AxiPortDecl for writing VHDL signal declarations,
+# assignments and port mappings for the signals.
+#
+# Assume you want to declare a bundle of flat axi signals with a prefix
+# of e.g., 's00_' i.e. you want to write a signal declaration to
+# look like:
+#
+#   signal s00_awaddr   : std_logic_vector(31 downto 0);
+#   signal s00_awid     : std_logic_vector( 0 downto 0);
+#   signal s00_awvalid  : std_logic;
+#   signal s00_awready  : std_logic;
+#   .. etc. ...
+#
+# Use
+#   s00Decl = AxiSignalDecl( prefix = 's00_' )
+#   s00Decl.map()
+#
+# You can create an assignment, e.g., of s00_xx <= s01_xx
+#
+#   s00Decl.assign( 's01_' )
+#
+# or map the signal to a port 'axiFooPort_':
+#
+#   s00Decl.portMap( 'axiFooPort_' )
 
 class AxiSignalDecl(AxiPortDecl):
 
@@ -244,12 +338,13 @@ class AxiSignalDecl(AxiPortDecl):
     self.p( "signal ", end="" )
     orig = self.indent()
     self.indent( 0 )
-    if width == 0:
+    if width == 0 and self.numPorts() > 1:
       width = 1
     super().__call__(port, sname, m2s, width * self.numPorts(), isLast, arg)
     self.indent( orig )
 
-  def mapping(self, assign, me, other, isLast):
+  # create port map or an assignment to 
+  def _mapping(self, assign, me, other, isLast, m2s):
     rhs = me
     lhs = other
     isMst = self.isMst()
@@ -271,13 +366,42 @@ class AxiSignalDecl(AxiPortDecl):
       end = ""
     self.p( "{:{FW}}{} {}{}".format( lhs, op, rhs, end, FW=self.fieldWidth() ) )
 
-  def assign(self, port, sname, m2s, width, isLast, arg):
-    self.mapping( True, self.prefix() + port + sname, arg + port + sname, isLast )
+  def _assign(self, port, sname, m2s, width, isLast, arg):
+    self._mapping( True, self.prefix() + port + sname, arg + port + sname, isLast, m2s )
 
-  def pmap(self, port, sname, m2s, width, isLast, arg):
-    self.mapping( False, self.prefix() + port + sname, arg + port + sname, isLast )
+  def assign(self, other_prefix):
+    self.map( self._assign, other_prefix )
 
-# Map a collection of flat signals to rec_axi_ms/rec_axi_sm
+  def _pmap(self, port, sname, m2s, width, isLast, arg):
+    self._mapping( False, self.prefix() + port + sname, arg + port + sname, isLast, m2s )
+
+  def portMap(self, other_prefix):
+    self.map( self._pmap, other_prefix )
+
+# Map a collection of flat signals to/from rec_axi_ms/rec_axi_sm
+#
+# E.g., if we have a flat AXI signal declaration (e.g., created
+# with AxiSignalDecl):
+#
+#    s00_araddr  : std_logic_vector(31 downto 0);
+#    s00_arvalid : std_logic;
+#    s00_arready : std_logic;
+#    ...
+# and signal records:
+#    s00_ms      : rec_axi_ms;
+#    s00_sm      : rec_axi_sm;
+#
+# then we can assign the former to the latter
+#
+#    map = AxiPortMap( flatPrefix='s00_', recPrefix='s00', flatToRec=True )
+#    map.isAssign( True )
+#    map.map()
+#
+# Note that because the record names *must* use '_ms' and '_sm' suffixes
+# the recPrefix normally does not end with a '_'. However, no assumptions
+# exist regarding the 'flatPrefix', i.e., any '_' separating the flat previx
+# from the rest of the expanded names must be part of the flatPrefix!
+
 class AxiPortMap(AxiPort):
 
   props = {
@@ -286,10 +410,13 @@ class AxiPortMap(AxiPort):
     "pruneAddr"       : None,   # optional: positive number limiting with of address mapping
     "isLastPort"      : False,  # if this is the last port (omitting ',' at the end of the line)
     "fieldWidth"      : 40,     # field width (pretty printing) of LHS
-    "useLHRange"      : True,   # whether to use a range on the LHS
-    "flatToRec"       : True,   # direction of mapping (currently unused/untested)
+    "useFlatRange"    : True,   # whether to use a range on the flat signals
+    "flatToRec"       : True,   # direction of mapping
     "numPorts"        : 1,      # number of ports (array of records mapped to vectors on the flat side)
-    "isAssign"        : False   # create an assignment a <= b;
+    "isAssign"        : False,  # create an assignment a <= b;
+    # whether even scalar signals (such as valid/ready) should be
+    # declared as std_logic_vector(0 downto 0)
+    "scalarAsVect"    : False
   }
 
   def __init__(self, flatPrefix, recPrefix, **kwargs):
@@ -298,13 +425,14 @@ class AxiPortMap(AxiPort):
     self.recPrefix  ( recPrefix )
 
   def __call__(self, port, sname, m2s, width, isLast, arg):
-    if ( width == 0 ):
+    if ( width == 0 and ( self.scalarAsVect() or self.numPorts() != 1 ) ):
       width = 1
     if ( self.numPorts() == 1 ):
       fidx =''
     else:
       fidx = '({2:d})'
     trng = ""
+    # width cannot be 0 when prunedWidth is used
     prunedWidth = width
     if ( (sname == "addr") and (not self.pruneAddr() is None) ):
        prunedWidth = self.pruneAddr()
@@ -315,8 +443,11 @@ class AxiPortMap(AxiPort):
        op = "=>"
     f = "{0:{W}}" + op + " {1}{2}"
     for pidx in range(self.numPorts()):
-      if ( self.useLHRange() ):
-        if ( (width == 1) and (sname != "user") ):
+      if ( self.useFlatRange() ):
+        if   ( width == 0 ):
+          # if width is still 0 then scalarAsVect must be false and numPorts == 1
+          rng = ""
+        elif ( (width == 1) and (sname != "user") ):
           rng = "({:d})".format( pidx )
         else:
           r   = pidx * width
@@ -365,12 +496,94 @@ class AxiPortMap(AxiPort):
            rhs = flatName
       self.p( f.format(lhs, rhs, end, W=self.fieldWidth()) )
 
-# Xilinx AXI Crossbar IP
+# AxiPortMap without arqos, awqos, aruser, awuser.
+class AxiSubMap(AxiPortMap):
+
+  props = {
+    "indent"     :   6,
+    "fieldWidth" :  28
+  }
+
+  def __init__(self, flatPrefix="s00_axi_", recPrefix="axi", **kwargs):
+    super().__init__(flatPrefix, recPrefix, **kwargs)
+    self.filter( ["ar.qos", "aw.qos", "ar.user", "aw.user"] )
+    self.useFlatRange( False )
+
+  def write(self, fnam):
+    fo=self.file()
+    try:
+      with io.open(fnam, "w") as f:
+        self.file(f)
+        self.map()
+    finally:
+      self.file(fo)
+
+
+########
+# Classes to wrap the Xilinx AXI Crossbar IP
+########
+
+# Class to hold the core properties of an XBar master port:
+#  - base address of this port
+#  - bit-width of this port
+class MstPort:
+  def __init__(self, addr, width=12):
+    if ( addr < 0 ):
+      raise RuntimeError("Address must be non-negative")
+    if ( width < 1 or width > 32 ):
+      raise RuntimeError("Width must be in 1..32")
+    if ( addr & ((1<<width) - 1) != 0 ):
+      raise RuntimeError("Misaligned Address")
+    self._addr  = addr
+    self._width = width
+
+  @property
+  def addr(self):
+    return self._addr
+
+  @property
+  def width(self):
+    return self._width
+
+  @property
+  def description(self):
+    return "0x{:08x}..0x{:08x}".format( self.addr, self.addr + (1 << self.width) - 1 )
+
+# The AXI Crossbar.
+# Usage:
+#   1. construct an AxiXbar object
+#         - pass a list of MstPort objects; this defines how many
+#           master ports the crossbar will have and their address map
+#           layout.
+#         - name to use for the Xilinx Axi crossbar IP (default: AxiXBar)
+#         - width of the slave port of the crossbar (default: 32)
+#   2. use the 'writeTcl(filename)' member function to generate
+#      a TCL script which - when run by Vivado - configures and
+#      instantiates a AXI Crossbar IP with the desired number of master
+#      ports and address layout etc. 
+#   3. use the 'writeHdl(filename)' member function to generate a VHDL
+#      wrapper for the IP core generated by 2. This wrapper connects
+#      to the outside world using psi_common record types rather than
+#      many unbundled signals.
+#      Note that because these record types do not currently support
+#      an AXI address width > 32 there will be also two additional
+#      'araddr_hi' and 'awaddr_hi' ports to represent the upper bits
+#      of the slave port (to support slave port width > 32).
+#
+# Your HDL code can then go on and connect to the AxiXBar using
+# psi_common records and arrays of records. This drastically reduces
+# the amount of typing required and renders the HDL more organized
+# and readable.
+
 class AxiXbar:
 
   # The crossbar does not use the ID signals
   _skip = [ "aw.id", "ar.id" ]
 
+  # ports     : a list of 'MstPort' objects
+  # name      : name of the Axi crossbar IP to be wrapped; the wrapper
+  #             will be named: '<name>Wrapper'
+  # saddrWidth: width of the slave port's address buses
   def __init__(self, ports, name="AxiXBar", saddrWidth=32):
     self._ports = []
     if ( saddrWidth < 32 or saddrWidth > 64 ):
@@ -387,14 +600,22 @@ class AxiXbar:
   def name(self):
     return self._name
 
+  # return number of master ports
   @property
   def numMst(self):
     return len(self._ports)
 
+  # generate a TCL script for vivado to instantiate an IP
+  # with the desired number of master ports, address layout
+  # and name etc.
   def writeTcl(self, fnam="AxiXBar.tcl"):
     with io.open(fnam, "w") as f:
       self._writeTcl( f )
 
+  # generate a VHDL wrapper for the xilinx IP. The entity
+  # (named '<name>Wrapper') connects to the outside (= your
+  # project) using psi_common record types rather than
+  # unbundled signals.
   def writeHdl(self, fnam="AxiXBarWrapper.vhd"):
     with io.open(fnam, "w") as f:
       self._writeHdl( f )
@@ -426,6 +647,10 @@ class AxiXbar:
     print(slfmt.format( "aclk",    "in" ), file=file)
     print(slfmt.format( "aresetn", "in" ), file=file)
     port = AxiPortDecl( prefix="s_axi_", isMst=False, indent=(indent + 4), file=file )
+    # Axi crossbar maps everything in vectors; e.g. 'ready' is a
+    # std_logic_vector(num_axi_ports - 1  downto 0), i.e., event for
+    # a single port this is a vector of length 1.
+    port.scalarAsVect( True )
     port.filter( self._skip )
     port.setWidth( "ar.addr", self._sawidth )
     port.setWidth( "aw.addr", self._sawidth )
@@ -475,13 +700,13 @@ class AxiXbar:
     self._writeComponentDeclaration(file=file, indent=2)
     print("",                                                                                      file = file)
 
-    msig = AxiSignalDecl( "m_axi00_", file=file, indent=2)
+    msig = AxiSignalDecl( "m_axi00_", file=file, indent=2, scalarAsVect=True)
     msig.numPorts( self.numMst )
     msig.filter( self._skip )
     msig.map()
     print("",                                                                                      file = file)
 
-    ssig = AxiSignalDecl( "s_axi00_", file=file, indent=2)
+    ssig = AxiSignalDecl( "s_axi00_", file=file, indent=2, scalarAsVect=True)
     ssig.filter( self._skip )
     ssig.map()
     print("",                                                                                      file = file)
@@ -491,15 +716,15 @@ class AxiXbar:
     print("    port map (",                                                                        file = file)
     print("      {:40s}=> {},".format("aclk",    clk),                                            file = file)
     print("      {:40s}=> {},".format("aresetn", rst),                                            file = file)
-    ssig.fieldWidth( 40 ).indent(6).map(ssig.pmap, "s_axi_")
+    ssig.fieldWidth( 40 ).indent(6).portMap("s_axi_")
     msig.isLastPort(True)
-    msig.fieldWidth( 40 ).indent(6).map(msig.pmap, "m_axi_")
+    msig.fieldWidth( 40 ).indent(6).portMap("m_axi_")
     print("    );",                                                                                file = file)
     print("",                                                                                     file = file)
 
     # map intermediate signals to records
     # master ports first; we can use standard features to map addresses != 32
-    m = AxiPortMap( flatPrefix = "m_axi00_", recPrefix="maxi",file=file, indent=2)
+    m = AxiPortMap( flatPrefix = "m_axi00_", recPrefix="maxi",file=file, indent=2, scalarAsVect=True)
     m.filter( self._skip )
     m.numPorts( self.numMst ).isAssign(True)
     if self._sawidth > 32:
@@ -518,33 +743,47 @@ class AxiXbar:
       print("  {:40s}<= saxi_awaddr_hi({:d} downto 32);".format( nam, l ),                        file = file)
     print("end architecture rtl;",                                                                file = file)
 
-class AxiSubMap(AxiPortMap):
-
-  props = {
-    "indent"     :   6,
-    "fieldWidth" :  28
-  }
-
-  def __init__(self, flatPrefix="s00_axi_", recPrefix="axi", **kwargs):
-    super().__init__(flatPrefix, recPrefix, **kwargs)
-    self.filter( ["ar.qos", "aw.qos", "ar.user", "aw.user"] )
-    self.useLHRange( False )
-
-  def write(self, fnam):
-    fo=self.file()
-    try:
-      with io.open(fnam, "w") as f:
-        self.file(f)
-        self.map()
-    finally:
-      self.file(fo)
-
+# Helper class to create a VHDL port map connecting
+# psi_common records to a Vivado ILA 'probe'.
+#
+# This does not completely auto-generate the instantiation
+# of an ILA but just creates (part of) the VHAL port map.
+# The user is intended to 'copy/paste' the output of the
+# 'map()' member function into his/her code.
+#
+# Example: we have signals (of psi_common axi record types)
+#
+#     signal myAxi_ms : rec_axi_ms;
+#     signal myAxi_sm : rec_axi_sm;
+#
+# and want to connect those to an ILA's 'probe1' port
+# which we assume is wide enough.
+#
+# Note: the 'ms' and 'sm' signals MUST have the same name
+#       differing only in the last character which must be 'm'
+#       for the 'rec_axi_ms' typed signal and 's' for its 
+#       companion.
+#
+#     # create
+#     helper = AxiIlaMap()
+#     # set parameters
+#     helper.ilaPrefix('probe1').recPrefix('myAxi_').indent(8)
+#     # print mapping (to be pasted into your code)
+#     helper.map()
+#
+# Beautification: you can tune the indentation and position
+# of the '=>' operator by setting 'indent' and 'fieldWidth'
+# ('=>' position is indent + fieldWidth).
+#
+# Optionally (to reduce the width of the required probe) you can
+# prune the number of address bus bits to be probed by setting
+# 'pruneAddr' to a positive number.
     
 class AxiIlaMap(AxiPort):
 
   props = {
     "ilaPrefix"       : "probe0",        # prefix of the ILA port
-    "recPrefix"       : "axi",            # prefix of the records
+    "recPrefix"       : "axi",           # prefix of the records
     "pruneAddr"       : None,            # optional: positive number limiting with of address mapping
     "fieldWidth"      : 40               # field width (pretty printing) of LHS
   }
