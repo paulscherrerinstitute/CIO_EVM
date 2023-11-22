@@ -132,7 +132,7 @@ class AxiPort(PropBase):
     "aw.len"   : [ True, 7   ],
     "aw.size"  : [ True, 2   ],
     "aw.burst" : [ True, 1   ],
-    "aw.lock"  : [ True,-1   ],
+    "aw.lock"  : [ True, 0   ],
     "aw.cache" : [ True, 3   ],
     "aw.prot"  : [ True, 2   ],
     "aw.qos"   : [ True, 3   ],
@@ -152,7 +152,7 @@ class AxiPort(PropBase):
     "ar.len"   : [ True, 7   ],
     "ar.size"  : [ True, 2   ],
     "ar.burst" : [ True, 1   ],
-    "ar.lock"  : [ True,-1   ],
+    "ar.lock"  : [ True, 0   ],
     "ar.cache" : [ True, 3   ],
     "ar.prot"  : [ True, 2   ],
     "ar.qos"   : [ True, 3   ],
@@ -163,7 +163,9 @@ class AxiPort(PropBase):
     "r.resp"   : [ False, 1  ],
     "r.last"   : [ False,-1  ],
     "r.valid"  : [ False,-1  ],
-    "r.ready"  : [ True,-1   ]
+    "r.ready"  : [ True,-1   ],
+    "aw.region": [ True, 3   ],
+    "ar.region": [ True, 3   ]
   }
 
   _AXIL_FILTER_KEYS = [
@@ -184,7 +186,9 @@ class AxiPort(PropBase):
     "ar.cache",
     "ar.qos",
     "ar.user",
-    "r.last"
+    "r.last",
+    "aw.region",
+    "ar.region"
   ]
 
   @staticmethod
@@ -447,7 +451,7 @@ class AxiPortMap(AxiPort):
         if   ( width == 0 ):
           # if width is still 0 then scalarAsVect must be false and numPorts == 1
           rng = ""
-        elif ( (width == 1) and (sname != "user") ):
+        elif ( (width == 1) and (sname != "user") and (sname != "id") ):
           rng = "({:d})".format( pidx )
         else:
           r   = pidx * width
@@ -577,8 +581,9 @@ class MstPort:
 
 class AxiXbar:
 
-  # The crossbar does not use the ID signals
-  _skip = [ "aw.id", "ar.id" ]
+  # The crossbar does not use the ID signals and no region signals on the slave side
+  _skips = [ "aw.id", "ar.id", "ar.region", "aw.region" ]
+  _skipm = [ "aw.id", "ar.id" ]
 
   # ports     : a list of 'MstPort' objects
   # name      : name of the Axi crossbar IP to be wrapped; the wrapper
@@ -651,12 +656,21 @@ class AxiXbar:
     # std_logic_vector(num_axi_ports - 1  downto 0), i.e., event for
     # a single port this is a vector of length 1.
     port.scalarAsVect( True )
-    port.filter( self._skip )
+    port.filter( self._skips )
     port.setWidth( "ar.addr", self._sawidth )
     port.setWidth( "aw.addr", self._sawidth )
     # crossbar 
     port.map()
-    port.prefix( "m_axi_" ).isMst( True ).nPortsInVect( self.numMst ).isLastPort( True )
+
+    port = AxiPortDecl( prefix="m_axi_", isMst=True, indent=(indent + 4), file=file )
+    # Axi crossbar maps everything in vectors; e.g. 'ready' is a
+    # std_logic_vector(num_axi_ports - 1  downto 0), i.e., event for
+    # a single port this is a vector of length 1.
+    port.scalarAsVect( True )
+    port.filter( self._skipm )
+    port.setWidth( "ar.addr", self._sawidth )
+    port.setWidth( "aw.addr", self._sawidth )
+    port.nPortsInVect( self.numMst ).isLastPort( True )
     port.map()
     print(ind+"  );"       , file=file)
     print(ind+"end component {};".format( self.name ), file = file)
@@ -702,12 +716,12 @@ class AxiXbar:
 
     msig = AxiSignalDecl( "m_axi00_", file=file, indent=2, scalarAsVect=True)
     msig.numPorts( self.numMst )
-    msig.filter( self._skip )
+    msig.filter( self._skipm )
     msig.map()
     print("",                                                                                      file = file)
 
     ssig = AxiSignalDecl( "s_axi00_", file=file, indent=2, scalarAsVect=True)
-    ssig.filter( self._skip )
+    ssig.filter( self._skips )
     ssig.map()
     print("",                                                                                      file = file)
 
@@ -725,14 +739,18 @@ class AxiXbar:
     # map intermediate signals to records
     # master ports first; we can use standard features to map addresses != 32
     m = AxiPortMap( flatPrefix = "m_axi00_", recPrefix="maxi",file=file, indent=2, scalarAsVect=True)
-    m.filter( self._skip )
+    m.filter( self._skipm )
     m.numPorts( self.numMst ).isAssign(True)
     if self._sawidth > 32:
       m.pruneAddr(32)
     m.map()
     print("",                                                                                     file = file)
 
-    m.flatPrefix("s_axi00_").recPrefix("saxi").numPorts(1).flatToRec( False )
+    m = AxiPortMap( flatPrefix = "s_axi00_", recPrefix="saxi",file=file, indent=2, scalarAsVect=True)
+    m.filter( self._skips )
+    m.numPorts(1).flatToRec( False ).isAssign(True)
+    if self._sawidth > 32:
+      m.pruneAddr(32)
     m.map()
     # extra address lines
     if ( self._sawidth > 32 ):

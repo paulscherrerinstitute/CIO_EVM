@@ -106,7 +106,9 @@ architecture rtl of AxiXBarWrapper is
       m_axi_rresp                             : in  std_logic_vector( 9 downto 0 );
       m_axi_rlast                             : in  std_logic_vector( 4 downto 0 );
       m_axi_rvalid                            : in  std_logic_vector( 4 downto 0 );
-      m_axi_rready                            : out std_logic_vector( 4 downto 0 )
+      m_axi_rready                            : out std_logic_vector( 4 downto 0 );
+      m_axi_awregion                          : out std_logic_vector( 19 downto 0 );
+      m_axi_arregion                          : out std_logic_vector( 19 downto 0 )
     );
   end component AxiXBar;
 
@@ -145,6 +147,8 @@ architecture rtl of AxiXBarWrapper is
   signal m_axi00_rlast       : std_logic_vector( 4 downto 0 );
   signal m_axi00_rvalid      : std_logic_vector( 4 downto 0 );
   signal m_axi00_rready      : std_logic_vector( 4 downto 0 );
+  signal m_axi00_awregion    : std_logic_vector( 19 downto 0 );
+  signal m_axi00_arregion    : std_logic_vector( 19 downto 0 );
 
   signal s_axi00_awaddr      : std_logic_vector( 39 downto 0 );
   signal s_axi00_awlen       : std_logic_vector( 7 downto 0 );
@@ -256,7 +260,9 @@ begin
       m_axi_rresp                             => m_axi00_rresp,
       m_axi_rlast                             => m_axi00_rlast,
       m_axi_rvalid                            => m_axi00_rvalid,
-      m_axi_rready                            => m_axi00_rready
+      m_axi_rready                            => m_axi00_rready,
+      m_axi_awregion                          => m_axi00_awregion,
+      m_axi_arregion                          => m_axi00_arregion
     );
 
   maxi_ms(0).aw.addr(32 - 1 downto 0)     <= m_axi00_awaddr(31 downto 0);
@@ -434,6 +440,16 @@ begin
   maxi_ms(2).dr.ready                     <= m_axi00_rready(2);
   maxi_ms(3).dr.ready                     <= m_axi00_rready(3);
   maxi_ms(4).dr.ready                     <= m_axi00_rready(4);
+  maxi_ms(0).aw.region                    <= m_axi00_awregion(3 downto 0);
+  maxi_ms(1).aw.region                    <= m_axi00_awregion(7 downto 4);
+  maxi_ms(2).aw.region                    <= m_axi00_awregion(11 downto 8);
+  maxi_ms(3).aw.region                    <= m_axi00_awregion(15 downto 12);
+  maxi_ms(4).aw.region                    <= m_axi00_awregion(19 downto 16);
+  maxi_ms(0).ar.region                    <= m_axi00_arregion(3 downto 0);
+  maxi_ms(1).ar.region                    <= m_axi00_arregion(7 downto 4);
+  maxi_ms(2).ar.region                    <= m_axi00_arregion(11 downto 8);
+  maxi_ms(3).ar.region                    <= m_axi00_arregion(15 downto 12);
+  maxi_ms(4).ar.region                    <= m_axi00_arregion(19 downto 16);
 
   s_axi00_awaddr(31 downto 0)             <= saxi_ms.aw.addr(32 - 1 downto 0);
   s_axi00_awlen(7 downto 0)               <= saxi_ms.aw.len;
