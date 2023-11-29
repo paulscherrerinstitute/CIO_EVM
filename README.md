@@ -205,6 +205,15 @@ ways: either VME-EVM compatible (from FCT-control) or EVR compatible (from EVR
 registers). Note that the EVR-compatible feature is *not* present in the
 VME-EVM.
 
+### Other Missing Features
+
+Some features documented for the DC-EVR are not implemented in the
+embedded version used by CIO_EVM. This includes e.g., the DC-related
+registers (measured value, target etc.; these are part of the EVG
+registers but for sake of consistency it would be nice if they also
+would be at least readable from the EVR register space in the standard
+places).
+
 ### Backplane Distribution
 
 Unfortunately it is currently not possible to *receive* the event stream
@@ -221,7 +230,7 @@ In order to receive the incoming stream from the backplane some sort of
 multiplexing must be implemented in firmware. Either via generics (building
 a special bitstream for this case) or logic.
 
-### ILA Note
+## ILA Note
 
 I have experienced Vivado complaining ILAs having no clock despite
 the (event) clock running. It seems the ILAs can get into this state
