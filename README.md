@@ -220,3 +220,25 @@ slot which cannot be populated with a CIO-EVM.
 In order to receive the incoming stream from the backplane some sort of
 multiplexing must be implemented in firmware. Either via generics (building
 a special bitstream for this case) or logic.
+
+### ILA Note
+
+I have experienced Vivado complaining ILAs having no clock despite
+the (event) clock running. It seems the ILAs can get into this state
+when the event clock is stopped but later resumed. This can happen
+if the event clock source is switched (e.g., from 'fractional synthesizer'
+to 'Rx Recovered Clock').
+
+I successfully used ILAs when being careful that I never connect
+Vivado until the target clock setup is stable:
+
+  1. reconfigure FPGA (e.g., with hardware manager)
+  2. disconnect hw manager completely (disconnect 'server')
+  3. bring up EVM software and program event clock frequency
+     and -source.
+  4. make sure clocking is stable.
+  5. start Vivado hw manager and connect to target
+  6. ILAs should be working now.
+
+Note that once Vivado complained about stopped ILAs I could only
+get away from this state by reconfiguring the fabric.
