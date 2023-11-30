@@ -279,3 +279,8 @@ it says exactly that:
 It is therefore important to initialize the Si5395 clocks
 prior to loading the bitstream (an initial reset is probably
 attempted and then leads to the problematic scenario).
+
+Note that when trying to debug this with the ILAs in combination
+with a stopped event clock it may be necessary to manually
+connect the Vivado debug hub to the Axi clock as by default
+Vivado may pick the event clock...
