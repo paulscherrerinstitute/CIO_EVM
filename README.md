@@ -230,7 +230,9 @@ In order to receive the incoming stream from the backplane some sort of
 multiplexing must be implemented in firmware. Either via generics (building
 a special bitstream for this case) or logic.
 
-## ILA Note
+## Known Problems
+
+### ILA Note
 
 I have experienced Vivado complaining ILAs having no clock despite
 the (event) clock running. It seems the ILAs can get into this state
@@ -251,3 +253,29 @@ Vivado until the target clock setup is stable:
 
 Note that once Vivado complained about stopped ILAs I could only
 get away from this state by reconfiguring the fabric.
+
+### Builtin FIFO Needs Stable Clock
+
+I have experienced problems with the event fifo of the embedded
+('downstream') EVR where no events would be seen despite 'real'
+EVRs downstream of the CPSI fanout would receive them.
+
+I tracked this down to the event fifo (in opb_evr_l.vhd). The fifo
+is being written but does not store any data. When I connected
+the 'reset busy' lines to an ILA I could see that these were
+permanently asserted (even a reset would not help). The only
+way to get it working was re-configuring the FPGA.
+
+I found some remark (PG-057, Fifo-Generator 13.2, pp. 127) where
+it says exactly that:
+
+      IMPORTANT: The clock(s) must be available when the reset
+      is applied. If for any reason, the clock(s) is/are lost at
+      the time of reset, you must apply the reset again when the
+      clock(s) is/are available. Violating this requirement may
+      cause an unexpected behavior. Sometimes, the busy signals
+      may be stuck and might need reconfiguration of FPGA.
+
+It is therefore important to initialize the Si5395 clocks
+prior to loading the bitstream (an initial reset is probably
+attempted and then leads to the problematic scenario).
