@@ -115,22 +115,22 @@ entity cpsi_cio_top is
     L8_MSH_GBT_TX_P     : out STD_LOGIC;
     ME_FPI_LED_SDTI     : out std_logic;
     ME_FPI_LED_SCKI     : out std_logic;
-    RIO_04_P            : in std_logic;
-    RIO_05_P            : in std_logic;
-    RIO_06_P            : in std_logic;
-    RIO_07_P            : in std_logic;
-    RIO_08_P            : in std_logic;
-    RIO_09_P            : in std_logic;
-    RIO_10_P            : in std_logic;
-    RIO_11_P            : in std_logic;
-    RIO_12_P            : out std_logic;
-    RIO_12_N            : out std_logic;
-    RIO_13_P            : out std_logic;
-    RIO_13_N            : out std_logic;
-    RIO_14_P            : out std_logic;
-    RIO_14_N            : out std_logic;
-    RIO_15_P            : out std_logic;
-    RIO_15_N            : out std_logic
+    RIO_04_P            : out std_logic;     -- RTM FIO LEMO 0 Output but can be configure with inout and bufio
+    RIO_05_P            : in std_logic;      -- RTM FIO LEMO 1 Input but can be configure with inout and bufio
+    RIO_06_P            : in std_logic;      -- RTM FIO LEMO 2 Input but can be configure with inout and bufio
+    RIO_07_P            : in std_logic;      -- RTM FIO LEMO 3 Input but can be configure with inout and bufio
+    RIO_08_P            : in std_logic;      -- RTM FIO LEMO 4 Input but can be configure with inout and bufio      
+    RIO_09_P            : in std_logic;      -- RTM FIO LEMO 5 Input but can be configure with inout and bufio
+    RIO_10_P            : in std_logic;      -- RTM FIO LEMO 6 Input but can be configure with inout and bufio
+    RIO_11_P            : in std_logic;      -- RTM FIO LEMO 7 Input but can be configure with inout and bufio
+    RIO_12_P            : out std_logic;     -- RTM FIO LDIR_0 when '0' port B to A and '1' opposite
+    RIO_12_N            : out std_logic;     -- RTM FIO LDIR_1 when '0' port B to A and '1' opposite
+    RIO_13_P            : out std_logic;     -- RTM FIO LDIR_2 when '0' port B to A and '1' opposite
+    RIO_13_N            : out std_logic;     -- RTM FIO LDIR_3 when '0' port B to A and '1' opposite
+    RIO_14_P            : out std_logic;     -- RTM FIO LDIR_4 when '0' port B to A and '1' opposite
+    RIO_14_N            : out std_logic;     -- RTM FIO LDIR_5 when '0' port B to A and '1' opposite
+    RIO_15_P            : out std_logic;     -- RTM FIO LDIR_6 when '0' port B to A and '1' opposite
+    RIO_15_N            : out std_logic      -- RTM FIO LDIR_7 when '0' port B to A and '1' opposite
   );
 
   attribute IO_BUFFER_TYPE : string;
@@ -140,7 +140,7 @@ entity cpsi_cio_top is
 end entity cpsi_cio_top;
 
 architecture STRUCTURE of cpsi_cio_top is
-
+signal FP_LEMO_OUT_0_s : std_logic;
   -- defined by the TCL code that instantiates the AXI crossbar IP
   constant N_MST_C                             : natural := 5;
   constant FW_ID_IDX_C                         : natural := 0;
@@ -192,6 +192,11 @@ architecture STRUCTURE of cpsi_cio_top is
   signal RX_REC_CLK                            : std_logic;
   signal UP_EVT_CLK                            : std_logic;
   signal EVT_CLK                               : std_logic;
+  -- test Jitter
+  attribute keep : string;  
+  signal FP_LEMO_OUT_1_s                       : std_logic;
+  attribute keep of FP_LEMO_OUT_1_s            : signal is "TRUE";
+  
 begin
 
   irq <= ( 0 => irq_evg, 1 => irq_evrd, 2 => irq_evru, others => '0');
@@ -612,7 +617,9 @@ begin
 
       FP_LEMO_IN_0              => FP_LEMO_IN_0,
       FP_LEMO_IN_1              => FP_LEMO_IN_1,
-      TBIN(0)                   => RIO_04_P,
+      UNIVOUT(0)                => FP_LEMO_OUT_1_s,
+      UNIVOUT(1)                => FP_LEMO_OUT_0_s,
+      TBIN(0)                   => RIO_05_P, -- test jitter
       TBIN(1)                   => RIO_05_P,
       TBIN(2)                   => RIO_06_P,
       TBIN(3)                   => RIO_07_P,
@@ -638,13 +645,14 @@ begin
 --      axis                     => maxi_sm( EVM_IDX_C )
 --    );
 
-  FP_LEMO_EN_0         <= '1';
-  FP_LEMO_EN_1         <= '1';
-  FP_LEMO_OUT_0        <= '0';
-  FP_LEMO_OUT_1        <= '0';
+  FP_LEMO_EN_0         <= '0';
+  FP_LEMO_EN_1         <= '0';
+  FP_LEMO_OUT_0        <= FP_LEMO_OUT_0_s;
+  FP_LEMO_OUT_1        <= FP_LEMO_OUT_1_s;
 
   -- Assumes CPSI_RTM_FIO
-  RIO_12_P             <= '0'; -- L_DIR_0 Low B->A; input
+  RIO_12_P             <= '1'; -- L_DIR_0 Low B->A; input
+  RIO_04_P             <= FP_LEMO_OUT_1_s;
   RIO_12_N             <= '0'; -- L_DIR_1 Low B->A; input
   RIO_13_P             <= '0'; -- L_DIR_2 Low B->A; input
   RIO_13_N             <= '0'; -- L_DIR_3 Low B->A; input

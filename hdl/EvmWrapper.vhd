@@ -58,7 +58,7 @@ entity EvmWrapper is
     FP_LEMO_IN_0             : in std_logic;
     FP_LEMO_IN_1             : in std_logic;
     TBIN                     : in std_logic_vector(0 to 7);
-
+    UNIVOUT                  : out std_logic_vector(1 downto 0);
     axi_aclk                 : in  std_logic;
     axi_aresetn              : in  std_logic;
     axi_ms                   : in  rec_axi_ms;
@@ -146,7 +146,7 @@ begin
 
       FP_LEMO_IN_0                => FP_LEMO_IN_0,
       FP_LEMO_IN_1                => FP_LEMO_IN_1,
-
+      UNIVOUT                     => UNIVOUT, -- test jitter 2/12/2024
       TBIN                        => TBIN,
 
       s00_axi_aclk                => axi_aclk,
