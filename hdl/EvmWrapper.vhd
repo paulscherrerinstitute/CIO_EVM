@@ -66,7 +66,8 @@ entity EvmWrapper is
 
     irq_evg                  : out std_logic;
     irq_evru                 : out std_logic;
-    irq_evrd                 : out std_logic
+    irq_evrd                 : out std_logic;
+    PULSEOUT                 : out std_logic_vector(7 downto 0)
   );
 end entity EvmWrapper;
 
@@ -146,7 +147,7 @@ begin
 
       FP_LEMO_IN_0                => FP_LEMO_IN_0,
       FP_LEMO_IN_1                => FP_LEMO_IN_1,
-      UNIVOUT                     => UNIVOUT, -- test jitter 2/12/2024
+     -- UNIVOUT                     => UNIVOUT, -- test jitter 2/12/2024
       TBIN                        => TBIN,
 
       s00_axi_aclk                => axi_aclk,
@@ -187,6 +188,7 @@ begin
 
       IRQ_EVG                     => irq_evg,
       IRQ_EVRD                    => irq_evrd,
-      IRQ_EVRU                    => irq_evru
+      IRQ_EVRU                    => irq_evru,
+      PULSEOUT                    => PULSEOUT
     );
 end architecture Mapping;
