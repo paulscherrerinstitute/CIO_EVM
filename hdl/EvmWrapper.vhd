@@ -4,6 +4,8 @@ use ieee.std_logic_1164.all;
 
 use work.psi_common_axi_pkg.all;
 
+use work.evr_bs_pkg.all;
+
 entity EvmWrapper is
   generic (
     C_CLKSYN_DIFFCLK_DIV2  : boolean
@@ -66,7 +68,9 @@ entity EvmWrapper is
 
     irq_evg                  : out std_logic;
     irq_evru                 : out std_logic;
-    irq_evrd                 : out std_logic
+    irq_evrd                 : out std_logic;
+
+    EVRD_OUT                 : out std_logic_vector(0 to C_EVR_INT_OUTPUTS-1)
   );
 end entity EvmWrapper;
 
@@ -187,6 +191,8 @@ begin
 
       IRQ_EVG                     => irq_evg,
       IRQ_EVRD                    => irq_evrd,
-      IRQ_EVRU                    => irq_evru
+      IRQ_EVRU                    => irq_evru,
+
+      EVRD_OUT                    => EVRD_OUT
     );
 end architecture Mapping;
