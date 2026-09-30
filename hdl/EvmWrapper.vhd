@@ -71,7 +71,6 @@ entity EvmWrapper is
     irq_evrd                 : out std_logic;
 
     EVRD_OUT                 : out std_logic_vector(0 to C_EVR_INT_OUTPUTS-1);
-    EVRD_INTOUT0             : out std_logic
   );
 end entity EvmWrapper;
 
@@ -195,6 +194,5 @@ begin
       IRQ_EVRU                    => irq_evru,
 
       EVRD_OUT                    => EVRD_OUT,
-      DBG_EVRD_INTOUT0            => EVRD_INTOUT0
     );
 end architecture Mapping;
