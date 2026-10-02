@@ -15,6 +15,8 @@ use     UNISIM.VCOMPONENTS.ALL;
 
 use     work.psi_common_axi_pkg.all;
 
+use work.evr_bs_pkg.all;
+
 entity cpsi_cio_top is
  generic (
    G_FW_GIT_VERSION      : std_logic_vector(255 downto 0) := (others=>'1');
@@ -192,6 +194,7 @@ architecture STRUCTURE of cpsi_cio_top is
   signal RX_REC_CLK                            : std_logic;
   signal UP_EVT_CLK                            : std_logic;
   signal EVT_CLK                               : std_logic;
+
 begin
 
   irq <= ( 0 => irq_evg, 1 => irq_evrd, 2 => irq_evru, others => '0');
@@ -283,7 +286,7 @@ begin
     );
 
   b_evm : block is
-
+  
   signal CLK_A_GTH_MSH_SFP1_GT                 : std_logic;
   signal CLK_A_GTH_QSFP0_GT                    : std_logic;
   signal CLK_B_GTH_MSH_GT                      : std_logic;
@@ -322,6 +325,8 @@ begin
   signal slv_fanout_mgt_p6_4321_tx_n           : std_logic_vector(3 downto 0);
 
   signal CLKSYN                                : std_logic;
+
+  signal evrd_out                              : std_logic_vector(0 to C_EVR_INT_OUTPUTS-1);
 
   begin
 
@@ -628,7 +633,9 @@ begin
 
       irq_evg                  => irq_evg,
       irq_evrd                 => irq_evrd,
-      irq_evru                 => irq_evru
+      irq_evru                 => irq_evru,
+
+      EVRD_OUT                 => evrd_out
     );
 
 --  i_axi_ila : entity work.AxiIla
@@ -637,11 +644,11 @@ begin
 --      axim                     => maxi_ms( EVM_IDX_C ),
 --      axis                     => maxi_sm( EVM_IDX_C )
 --    );
-
-  FP_LEMO_EN_0         <= '1';
-  FP_LEMO_EN_1         <= '1';
-  FP_LEMO_OUT_0        <= '0';
-  FP_LEMO_OUT_1        <= '0';
+  
+  FP_LEMO_EN_0         <= '0';
+  FP_LEMO_EN_1         <= '0';
+  FP_LEMO_OUT_0        <= evrd_out(0);
+  FP_LEMO_OUT_1        <= evrd_out(1);
 
   -- Assumes CPSI_RTM_FIO
   RIO_12_P             <= '0'; -- L_DIR_0 Low B->A; input
